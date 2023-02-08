@@ -30,7 +30,7 @@ And the following auxiliary data is applied:
 
 - [GSHHG](https://www.soest.hawaii.edu/pwessel/gshhg/)
 - [Natural Earth - Glaciated Areas](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-glaciated-areas/)
-- [Antarctic Ice Shelves](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-antarctic-ice-shelves/)
+- [Natural Earth - Antarctic Ice Shelves](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-antarctic-ice-shelves/)
 
 # Support and collaboration
 
