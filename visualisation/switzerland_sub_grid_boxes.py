@@ -21,11 +21,8 @@ from pyproj import Transformer
 #
 # mpl.style.use("classic")
 
-# Paths to folders
-root_IAC = os.getenv("HOME") + "/Dropbox/IAC/"
-
 # Load required functions
-sys.path.append(root_IAC + "Scripts/Miscellaneous/Terrain_3D_vis/functions/")
+sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from gebco import get as get_gebco
 from merit import get as get_merit
 from outlines import binary_mask as binary_mask_outlines

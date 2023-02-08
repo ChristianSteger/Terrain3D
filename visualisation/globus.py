@@ -24,11 +24,8 @@ from matplotlib.colors import ListedColormap
 #
 # mpl.style.use("classic")
 
-# Paths to folders
-root_IAC = os.getenv("HOME") + "/Dropbox/IAC/"
-
 # Load required functions
-sys.path.append(root_IAC + "Scripts/Miscellaneous/Terrain_3D_vis/functions/")
+sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from gebco import get as get_gebco
 from outlines import binary_mask as binary_mask_outlines
 from auxiliary import get_quad_indices
@@ -37,10 +34,10 @@ from auxiliary import get_quad_indices
 # Settings
 # -----------------------------------------------------------------------------
 
-# res_ter = 0.1  # resolution of visualised terrain [degree]
-# gebco_agg_num = 24  # aggregation number of input GEBCO data [-]
-res_ter = 0.05  # resolution of visualised terrain [degree]
-gebco_agg_num = 12  # aggregation number of input GEBCO data [-]
+res_ter = 0.1  # resolution of visualised terrain [degree]
+gebco_agg_num = 24  # aggregation number of input GEBCO data [-]
+# res_ter = 0.05  # resolution of visualised terrain [degree]
+# gebco_agg_num = 12  # aggregation number of input GEBCO data [-]
 
 ter_exa_fac = 25.0  # terrain exaggeration factor [-]
 

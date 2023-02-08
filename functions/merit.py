@@ -11,11 +11,8 @@ import rasterio
 import glob
 from rasterio.merge import merge
 
-# Paths to folders
-root_IAC = os.getenv("HOME") + "/Dropbox/IAC/"
-
 # Load required functions
-sys.path.append(root_IAC + "Scripts/Miscellaneous/Terrain_3D_vis/functions/")
+sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from auxiliary import download_file
 
 
@@ -99,7 +96,7 @@ def get(domain):
                     int(np.ceil(domain[3] / 30) * 30))
 
     # Ensure that required MERIT tile(s) were/was downloaded
-    path_data_root = root_IAC + "Temp/Terrain_3D_visualisation/data/"
+    path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
     lon_pre = ("w", "e", "e")
     lat_pre = ("s", "n", "n")
     for i in range(domain_30x30[0], domain_30x30[1], 30):

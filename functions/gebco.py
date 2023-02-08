@@ -10,11 +10,8 @@ import xarray as xr
 import time
 import numba as nb
 
-# Paths to folders
-root_IAC = os.getenv("HOME") + "/Dropbox/IAC/"
-
 # Load required functions
-sys.path.append(root_IAC + "Scripts/Miscellaneous/Terrain_3D_vis/functions/")
+sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from auxiliary import download_file
 
 
@@ -210,7 +207,7 @@ def get(agg_num, domain=(-180.0, 180.0, -90.0, 90.0)):
         raise ValueError("Latitude range out of bounds")
 
     # Ensure that GEBCO data was downloaded
-    path_data_root = root_IAC + "Temp/Terrain_3D_visualisation/data/"
+    path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
     _download(path_data_root)
 
     # Ensure that GEBCO data with aggregation number exists
