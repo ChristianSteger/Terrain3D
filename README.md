@@ -18,3 +18,20 @@ A number of examples scripts are provided in the folder *visualisation*:
 
 - **switzerland_sub_grid_boxes.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from switzerland_sub_grid_boxes.py")
+
+# Digital elevation model and auxiliary data
+
+The following DEM data is available in Terrain3D:
+
+- [GEBCO](https://www.gebco.net/data_and_products/gridded_bathymetry_data/)
+- [MERIT](http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/)
+
+And the following auxiliary data is applied:
+
+- [GSHHG](https://www.soest.hawaii.edu/pwessel/gshhg/)
+- [Natural Earth - Glaciated Areas](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-glaciated-areas/)
+- [Antarctic Ice Shelves](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-antarctic-ice-shelves/)
+
+# Support and collaboration
+
+In case of issues or questions, contact Christian R. Steger (christian.steger@env.ethz.ch). Please report any bugs you find in Terrain3D. You are welcome to fork this repository to modify the source code.
