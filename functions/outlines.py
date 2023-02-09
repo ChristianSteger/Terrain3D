@@ -9,8 +9,11 @@ import numpy as np
 import time
 import fiona
 from shapely.geometry import shape
+from shapely.ops import transform as transform_shapely
 from rasterio.transform import Affine
 from rasterio.features import rasterize
+from pyproj import CRS
+from pyproj import Transformer
 
 # import matplotlib.pyplot as plt
 # import matplotlib as mpl
@@ -78,7 +81,8 @@ def _download(path_data_root, product):
 
 # -----------------------------------------------------------------------------
 
-def binary_mask(product, lon, lat, resolution="intermediate", level=1):
+def binary_mask(product, x, y, crs_grid, resolution="intermediate",
+                level=1):
     """Compute binary mask from outlines.
 
     Parameters
@@ -86,10 +90,12 @@ def binary_mask(product, lon, lat, resolution="intermediate", level=1):
     product : str
         Outline product ('shorelines', 'glacier_land' or
         'antarctic_ice_shelves')
-    lon : ndarray of double
-        Array (1-dimensional) with geographic longitude [degree]
-    lat : ndarray of double
-        Array (1-dimensional) with geographic longitude [degree]
+    x : ndarray of double
+        Array (1-dimensional) with x-coordinates [arbitrary]
+    y : ndarray of double
+        Array (1-dimensional) with y-coordinates [arbitrary]
+    crs_grid : pyproj.crs.crs.CRS
+        Geospatial reference system of gridded input data
     resolution : str
         Resolution of shoreline outlines (either 'crude', 'low',
         'intermediate', 'high' or 'full')
@@ -112,17 +118,15 @@ def binary_mask(product, lon, lat, resolution="intermediate", level=1):
                        "antarctic_ice_shelves"):
         raise ValueError("Unknown product. Known products are 'shorelines',"
                          + " 'glacier_land' or 'antarctic_ice_shelves'")
-    if not np.all(np.diff(lon) > 0):
-        raise ValueError("Longitude values not strictly increasing")
-    if not np.all(np.diff(lat) > 0):
-        raise ValueError("Latitude values not strictly increasing")
+    if not np.all(np.diff(x) > 0):
+        raise ValueError("x-coordinates are not strictly increasing")
+    if not np.all(np.diff(y) > 0):
+        raise ValueError("y-coordinates values not strictly increasing")
     if resolution not in ("crude", "low", "intermediate", "high", "full"):
         raise ValueError("Invalid value for 'resolution'. Valid values are "
                          + "'crude', 'low', 'intermediate', 'high' or 'full'")
     if (level < 1) or (level > 6):
         raise ValueError("Value for 'level' out of range [1 - 6]")
-
-    t_beg = time.time()
 
     # Ensure that required data was downloaded
     path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
@@ -145,25 +149,39 @@ def binary_mask(product, lon, lat, resolution="intermediate", level=1):
 
     # Load polygons (large polygons are split)
     ds = fiona.open(shp_prod[product])
-    crs = ds.crs
-    if crs["init"] != "epsg:4326":
-        raise ValueError("Only shapefiles with EPSG:4326 can be processed")
+    crs_outlines = CRS.from_string(ds.crs["init"])
     polygons = [shape(i["geometry"]) for i in ds]
     ds.close()
 
-    # Compute binary mask
-    dlon = np.diff(lon).mean()
-    dlat = np.diff(lat).mean()
-    transform = Affine(dlon, 0.0, lon[0] - dlon / 2.0,
-                       0.0, dlat, lat[0] - dlat / 2.0)
-    mask_bin = rasterize(polygons, (len(lat), len(lon)), transform=transform)
+    # Transform polygons in case geospatial reference systems are different
+    if crs_grid == crs_outlines:
+        print("Both data sets share the same geospatial reference system "
+              + "(EPSG:" + str(crs_grid.to_epsg()) + ")")
+    else:
+        print("Transform polygons to geospatial reference system of grid data")
+        t_beg = time.time()
+        project = Transformer.from_crs(crs_outlines, crs_grid,
+                                       always_xy=True).transform
+        polygons_trans = []
+        for i in polygons:
+            polygons_trans.append(transform_shapely(project, i))
+        polygons = polygons_trans
+        print("Processing time: %.1f" % (time.time() - t_beg) + " s")
 
+    # Compute binary mask
+    print("Compute binary mask")
+    t_beg = time.time()
+    dx = np.diff(x).mean()
+    dy = np.diff(y).mean()
+    transform = Affine(dx, 0.0, x[0] - dx / 2.0,
+                       0.0, dy, y[0] - dy / 2.0)
+    mask_bin = rasterize(polygons, (len(y), len(x)), transform=transform)
     print("Processing time: %.1f" % (time.time() - t_beg) + " s")
 
     # # Test plot
     # plt.figure()
     # ax = plt.axes()
-    # plt.pcolormesh(lon, lat, mask_bin)
+    # plt.pcolormesh(x, y, mask_bin)
     # for i in polygons[:1000]:
     #     poly = PolygonPatch(i, facecolor="none", edgecolor="yellow")
     #     ax.add_patch(poly)

@@ -9,6 +9,7 @@ import numpy as np
 import xarray as xr
 import time
 import numba as nb
+from pyproj import CRS
 
 # Load required functions
 sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
@@ -198,7 +199,9 @@ def get(agg_num, domain=(-180.0, 180.0, -90.0, 90.0)):
     lat_gebco : ndarray of double
         Array (two-dimensional) with geographic latitude [degree]
     elevation_gebco : ndarray of float
-        Array (two-dimensional) with elevation [metre]"""
+        Array (two-dimensional) with elevation [metre]
+    crs_gebco : pyproj.crs.crs.CRS
+        Geospatial reference system of GEBCO"""
 
     # Check arguments
     if (domain[0] < -180.0) or (domain[1] > 180.0):
@@ -222,6 +225,7 @@ def get(agg_num, domain=(-180.0, 180.0, -90.0, 90.0)):
     lat_gebco = ds["lat"].values  # float64, [degree]
     lon_gebco = ds["lon"].values  # float64, [degree]
     elevation_gebco = ds["elevation"].values  # int16, [metre]
+    crs_gebco = CRS.from_string(ds["crs"].epsg_code)
     ds.close()
 
-    return lon_gebco, lat_gebco, elevation_gebco
+    return lon_gebco, lat_gebco, elevation_gebco, crs_gebco

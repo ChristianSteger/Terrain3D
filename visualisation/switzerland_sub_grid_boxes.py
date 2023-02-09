@@ -16,6 +16,7 @@ from matplotlib.colors import ListedColormap
 import time
 from pyproj import CRS
 from pyproj import Transformer
+from skimage.measure import label
 # import matplotlib.pyplot as plt
 # import matplotlib as mpl
 #
@@ -47,21 +48,21 @@ domain = (7.9, 10.0, 46.25, 47.25)  # Central/Eastern Switzerland
 
 # Get data (GEBCO or MERIT)
 if dem == "GEBCO":
-    lon_ver, lat_ver, elevation_ver = get_gebco(agg_num, domain)  # GEBCO
+    lon_ver, lat_ver, elevation_ver, crs_dem \
+        = get_gebco(agg_num, domain)  # GEBCO
 elif dem == "MERIT":
-    lon_ver, lat_ver, elevation_ver = get_merit(domain)
+    lon_ver, lat_ver, elevation_ver, crs_dem = get_merit(domain)
     if agg_num > 1:
         lon_ver, lat_ver, elevation_ver \
             = aggregate_dem(lon_ver, lat_ver, elevation_ver, agg_num)
 else:
     raise ValueError("Unknown DEM")
 
-
 # Compute binary lake mask (optional)
 if show_lakes:
     lon_quad = lon_ver[:-1] + np.diff(lon_ver) / 2.0
     lat_quad = lat_ver[:-1] + np.diff(lat_ver) / 2.0
-    mask_lake = binary_mask_outlines("shorelines", lon_quad, lat_quad,
+    mask_lake = binary_mask_outlines("shorelines", lon_quad, lat_quad, crs_dem,
                                      resolution="full", level=2)
 
     # # Test plot

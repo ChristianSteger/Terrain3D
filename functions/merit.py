@@ -10,6 +10,7 @@ import time
 import rasterio
 import glob
 from rasterio.merge import merge
+from pyproj import CRS
 
 # Load required functions
 sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
@@ -78,7 +79,9 @@ def get(domain):
     lat_merit : ndarray of double
         Array (two-dimensional) with geographic latitude [degree]
     elevation_merit : ndarray of float
-        Array (two-dimensional) with elevation [metre]"""
+        Array (two-dimensional) with elevation [metre]
+    crs_merit : pyproj.crs.crs.CRS
+        Geospatial reference system of MERIT"""
 
     # Check arguments
     if (domain[0] < -180.0) or (domain[1] > 180.0):
@@ -128,6 +131,9 @@ def get(domain):
                        + lon_pre[np.sign(i) + 1] + str(i).zfill(3) + "_dem.tif"
             sub_tiles.append(glob.glob(sub_tile)[0])
     mosaic, out_trans = merge(sub_tiles)
+    src = rasterio.open(sub_tiles[0])
+    crs_merit = CRS.from_epsg(src.crs.to_epsg())
+    src.close()
     print("Processing time: %.1f" % (time.time() - t_beg) + " s")
 
     # Set ocean values to 0.0 m
@@ -160,4 +166,4 @@ def get(domain):
     lat_merit = lat_merit[::-1]
     elevation_merit = np.flipud(elevation_merit)
 
-    return lon_merit, lat_merit, elevation_merit
+    return lon_merit, lat_merit, elevation_merit, crs_merit

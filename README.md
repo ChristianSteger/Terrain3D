@@ -3,7 +3,7 @@ Three-dimensional visualisation of terrain data from digital elevation models (D
 
 # Package dependencies
 
-The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarray, Numba, Shapely, Fiona, Rasterio, tqdm, requests, PyVista, Matplotlib, pyproj, cmcrameri, netCDF4, cartopy, xESMF, scikit-image
+The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarray, Numba, Shapely, descartes, Fiona, Rasterio, tqdm, requests, PyVista, Matplotlib, pyproj, cmcrameri, netCDF4, cartopy, xESMF, scikit-image
 
 # Installation
 

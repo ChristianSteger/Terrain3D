@@ -34,10 +34,10 @@ from auxiliary import get_quad_indices
 # Settings
 # -----------------------------------------------------------------------------
 
-res_ter = 0.1  # resolution of visualised terrain [degree]
-gebco_agg_num = 24  # aggregation number of input GEBCO data [-]
-# res_ter = 0.05  # resolution of visualised terrain [degree]
-# gebco_agg_num = 12  # aggregation number of input GEBCO data [-]
+# res_ter = 0.1  # resolution of visualised terrain [degree]
+# gebco_agg_num = 24  # aggregation number of input GEBCO data [-]
+res_ter = 0.05  # resolution of visualised terrain [degree]
+gebco_agg_num = 12  # aggregation number of input GEBCO data [-]
 
 ter_exa_fac = 25.0  # terrain exaggeration factor [-]
 
@@ -59,7 +59,7 @@ print("Dimensions of interpolated GEBCO data: "
       + str(lat_ver.size) + " x " + str(lon_ver.size))
 
 # Get GEBCO data
-lon_in, lat_in, elevation_in = get_gebco(gebco_agg_num)
+lon_in, lat_in, elevation_in, crs_in = get_gebco(gebco_agg_num)
 print("Dimensions of input GEBCO data: "
       + str(lat_in.size) + " x " + str(lon_in.size))
 
@@ -72,9 +72,9 @@ elevation_ver = f_ip_rbs(lat_ver, lon_ver).astype(np.float32)
 print("GEBCO data interpolated (%.1f" % (time.time() - t_beg) + " s)")
 
 # Set elevation of quad vertices, which are land and below sea level, to 0.0 m
-mask_land = binary_mask_outlines("shorelines", lon_ver, lat_ver,
+mask_land = binary_mask_outlines("shorelines", lon_ver, lat_ver, crs_in,
                                  resolution="intermediate", level=1)
-mask_lakes = binary_mask_outlines("shorelines", lon_ver, lat_ver,
+mask_lakes = binary_mask_outlines("shorelines", lon_ver, lat_ver, crs_in,
                                   resolution="intermediate", level=2)
 mask_land[mask_lakes] = False
 mask_lbsl = (elevation_ver < 0.0) & mask_land  # mask with land below sea level
@@ -122,10 +122,11 @@ print("Create quad vertices array (%.1f" % (time.time() - t_beg) + " s)")
 lon_quad = lon_ver[:-1] + np.diff(lon_ver) / 2.0
 lat_quad = lat_ver[:-1] + np.diff(lat_ver) / 2.0
 mask_ice = np.zeros((num_quad_lat, num_quad_lon), dtype=bool)
-mask_glacier_land = binary_mask_outlines("glacier_land", lon_quad, lat_quad)
+mask_glacier_land = binary_mask_outlines("glacier_land", lon_quad, lat_quad,
+                                         crs_in)
 mask_ice[mask_glacier_land] = True
 mask_ice_shelves = binary_mask_outlines("antarctic_ice_shelves", lon_quad,
-                                        lat_quad)
+                                        lat_quad, crs_in)
 mask_ice[mask_ice_shelves] = True
 del mask_glacier_land, mask_ice_shelves
 
