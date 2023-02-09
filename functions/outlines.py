@@ -82,7 +82,7 @@ def _download(path_data_root, product):
 # -----------------------------------------------------------------------------
 
 def binary_mask(product, x, y, crs_grid, resolution="intermediate",
-                level=1):
+                level=1, sub_sample_num=1):
     """Compute binary mask from outlines.
 
     Parameters
@@ -99,7 +99,7 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
     resolution : str
         Resolution of shoreline outlines (either 'crude', 'low',
         'intermediate', 'high' or 'full')
-    level : 1
+    level : int
         Level of shoreline data ('1' to '6'). Available levels are:
         1: Continental land masses and ocean islands, except Antarctica
         2: Lakes
@@ -107,6 +107,9 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         4: Ponds in islands within lakes
         5: Antarctica based on ice front boundary
         6: Antarctica based on grounding line boundary
+    sub_sample_num : int
+        Sub-sample within a grid cell. The value specifies the evenly spaced
+        sampling number in one direction.
 
     Returns
     -------
@@ -127,6 +130,8 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
                          + "'crude', 'low', 'intermediate', 'high' or 'full'")
     if (level < 1) or (level > 6):
         raise ValueError("Value for 'level' out of range [1 - 6]")
+    if (sub_sample_num < 1) or (sub_sample_num > 50):
+        raise ValueError("Value for 'sub_sample_num' out of range [1 - 50]")
 
     # Ensure that required data was downloaded
     path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
@@ -147,7 +152,7 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
             + "ne_10m_antarctic_ice_shelves_polys.shp"
     }
 
-    # Load polygons (large polygons are split)
+    # Load polygons
     ds = fiona.open(shp_prod[product])
     crs_outlines = CRS.from_string(ds.crs["init"])
     polygons = [shape(i["geometry"]) for i in ds]
@@ -171,11 +176,25 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
     # Compute binary mask
     print("Compute binary mask")
     t_beg = time.time()
-    dx = np.diff(x).mean()
-    dy = np.diff(y).mean()
-    transform = Affine(dx, 0.0, x[0] - dx / 2.0,
-                       0.0, dy, y[0] - dy / 2.0)
-    mask_bin = rasterize(polygons, (len(y), len(x)), transform=transform)
+    if sub_sample_num == 1:
+        dx = np.diff(x).mean()
+        dy = np.diff(y).mean()
+        transform = Affine(dx, 0.0, x[0] - dx / 2.0,
+                           0.0, dy, y[0] - dy / 2.0)
+        mask_bin = rasterize(polygons, (len(y), len(x)), transform=transform)
+    else:
+        print("Sub-sample within a grid cell (" + str(sub_sample_num) + " x "
+              + str(sub_sample_num) + ")")
+        dx = np.diff(x).mean()
+        dy = np.diff(y).mean()
+        x_lim = (x[0] - dx / 2, x[-1] + dx / 2)
+        y_lim = (y[0] - dy / 2, y[-1] + dy / 2)
+        x_ss = ############################################## continue...
+        y_ss =
+        transform = Affine(dx, 0.0, x[0] - dx / 2.0,
+                           0.0, dy, y[0] - dy / 2.0)
+        mask_bin = rasterize(polygons, (len(y), len(x)), transform=transform)
+        mask_bin = mask_bin  # ########################### aggregate!!!
     print("Processing time: %.1f" % (time.time() - t_beg) + " s")
 
     # # Test plot
