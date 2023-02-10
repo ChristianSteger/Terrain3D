@@ -14,10 +14,10 @@ from rasterio.transform import Affine
 from rasterio.features import rasterize
 from pyproj import CRS
 from pyproj import Transformer
-
 # import matplotlib.pyplot as plt
 # import matplotlib as mpl
 # from descartes import PolygonPatch
+#
 # mpl.style.use("classic")
 
 # Load required functions
@@ -108,8 +108,9 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         5: Antarctica based on ice front boundary
         6: Antarctica based on grounding line boundary
     sub_sample_num : int
-        Sub-sample within a grid cell. The value specifies the evenly spaced
-        sampling number in one direction.
+        Number of sub-samples that are performed within a grid cell in
+        one direction. Sampling is conducted evenly-spaced. Example: with the
+        setting 'sub_sample_num = 3', 3 x 3 = 9 samples are performed.
 
     Returns
     -------
@@ -176,32 +177,40 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
     # Compute binary mask
     print("Compute binary mask")
     t_beg = time.time()
+    dx = np.diff(x).mean()
+    dy = np.diff(y).mean()
     if sub_sample_num == 1:
-        dx = np.diff(x).mean()
-        dy = np.diff(y).mean()
         transform = Affine(dx, 0.0, x[0] - dx / 2.0,
                            0.0, dy, y[0] - dy / 2.0)
         mask_bin = rasterize(polygons, (len(y), len(x)), transform=transform)
     else:
-        print("Sub-sample within a grid cell (" + str(sub_sample_num) + " x "
+        print("Sub-sample within grid cells (" + str(sub_sample_num) + " x "
               + str(sub_sample_num) + ")")
-        dx = np.diff(x).mean()
-        dy = np.diff(y).mean()
-        x_lim = (x[0] - dx / 2, x[-1] + dx / 2)
-        y_lim = (y[0] - dy / 2, y[-1] + dy / 2)
-        x_ss = ############################################## continue...
-        y_ss =
-        transform = Affine(dx, 0.0, x[0] - dx / 2.0,
-                           0.0, dy, y[0] - dy / 2.0)
-        mask_bin = rasterize(polygons, (len(y), len(x)), transform=transform)
-        mask_bin = mask_bin  # ########################### aggregate!!!
+        x_ss_edge = np.linspace(x[0] - dx / 2.0, x[-1] + dx / 2.0,
+                                len(x) * sub_sample_num + 1)
+        y_ss_edge = np.linspace(y[0] - dy / 2.0, y[-1] + dy / 2.0,
+                                len(y) * sub_sample_num + 1)
+        x_ss = x_ss_edge[:-1] + np.diff(x_ss_edge) / 2.0
+        y_ss = y_ss_edge[:-1] + np.diff(y_ss_edge) / 2.0
+        dx_ss = np.diff(x_ss).mean()
+        dy_ss = np.diff(y_ss).mean()
+        transform = Affine(dx_ss, 0.0, x_ss[0] - dx_ss / 2.0,
+                           0.0, dy_ss, y_ss[0] - dy_ss / 2.0)
+        mask_bin = rasterize(polygons, (len(y_ss), len(x_ss)),
+                             transform=transform)
+        y_agg = np.arange(0, mask_bin.shape[0], sub_sample_num)
+        data_agg_y = np.add.reduceat(mask_bin, y_agg, axis=0)
+        x_agg = np.arange(0, mask_bin.shape[1], sub_sample_num)
+        data_agg_yx = np.add.reduceat(data_agg_y, x_agg, axis=1)
+        mask_bin = (data_agg_yx >= ((sub_sample_num * sub_sample_num) / 2.0)) \
+            .astype(np.uint8)
     print("Processing time: %.1f" % (time.time() - t_beg) + " s")
 
     # # Test plot
     # plt.figure()
     # ax = plt.axes()
     # plt.pcolormesh(x, y, mask_bin)
-    # for i in polygons[:1000]:
+    # for i in polygons[:10]:
     #     poly = PolygonPatch(i, facecolor="none", edgecolor="yellow")
     #     ax.add_patch(poly)
 
