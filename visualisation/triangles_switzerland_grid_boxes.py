@@ -27,7 +27,7 @@ sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from gebco import get as get_gebco
 from merit import get as get_merit
 from outlines import binary_mask as binary_mask_outlines
-from auxiliary import get_quad_indices
+from triangles import get_quad_indices
 from auxiliary import aggregate_dem
 
 # -----------------------------------------------------------------------------

@@ -28,7 +28,7 @@ from matplotlib.colors import ListedColormap
 sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from gebco import get as get_gebco
 from outlines import binary_mask as binary_mask_outlines
-from auxiliary import get_quad_indices
+from triangles import get_quad_indices
 
 # -----------------------------------------------------------------------------
 # Settings
