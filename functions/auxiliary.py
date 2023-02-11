@@ -6,7 +6,6 @@ import os
 from tqdm import tqdm
 import requests
 import numpy as np
-import numba as nb
 
 
 # -----------------------------------------------------------------------------
@@ -18,7 +17,7 @@ def download_file(file_url, file_path_local, auth=None):
     ----------
     file_url : str
         URL of file to download
-    file_path_local: str
+    file_path_local : str
         Local path for downloaded file
     auth : tuple
         Tuple (username, password) for enabling HTTP authentication """

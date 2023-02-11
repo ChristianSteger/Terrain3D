@@ -19,6 +19,10 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **triangles_switzerland_grid_boxes.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from triangles_switzerland_grid_boxes.py")
 
+- **columns_simple.py**: Simple example to illustrate visualisation of terrain with 'grid cell columns'.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Column_simple.png?raw=true "Output from columns_simple.py")
+
+
 # Digital elevation model and auxiliary data
 
 The following DEM data is available in Terrain3D:

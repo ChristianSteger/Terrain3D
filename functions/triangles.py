@@ -3,8 +3,6 @@
 
 # Load modules
 import os
-from tqdm import tqdm
-import requests
 import numpy as np
 import numba as nb
 
@@ -25,7 +23,7 @@ def get_quad_indices(num_ver_x, num_ver_y):
     Returns
     -------
     quad_indices : ndarray of double
-        Array (3-dimensional; num_quad_y, num_quad_x, 5) with indices of
+        Array (three-dimensional; num_quad_y, num_quad_x, 5) with indices of
         quads' vertices"""
 
     num_quad_x = num_ver_x - 1
