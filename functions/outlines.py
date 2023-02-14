@@ -10,6 +10,7 @@ import time
 import fiona
 from shapely.geometry import shape
 from shapely.ops import transform as transform_shapely
+from shapely.geometry import box
 from rasterio.transform import Affine
 from rasterio.features import rasterize
 from pyproj import CRS
@@ -23,6 +24,7 @@ from pyproj import Transformer
 # Load required functions
 sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
 from auxiliary import download_file
+from auxiliary import domain_extend_geo_coord
 
 
 # -----------------------------------------------------------------------------
@@ -82,7 +84,7 @@ def _download(path_data_root, product):
 # -----------------------------------------------------------------------------
 
 def binary_mask(product, x, y, crs_grid, resolution="intermediate",
-                level=1, sub_sample_num=1):
+                level=1, sub_sample_num=1, filter_polygons=False):
     """Compute binary mask from outlines.
 
     Parameters
@@ -111,6 +113,8 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         Number of sub-samples that are performed within a grid cell in
         one direction. Sampling is conducted evenly-spaced. Example: with the
         setting 'sub_sample_num = 3', 3 x 3 = 9 samples are performed.
+    filter_polygons : bool
+        Only consider polygons that intersect with relevant domain.
 
     Returns
     -------
@@ -154,10 +158,27 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
     }
 
     # Load polygons
-    ds = fiona.open(shp_prod[product])
-    crs_outlines = CRS.from_string(ds.crs["init"])
-    polygons = [shape(i["geometry"]) for i in ds]
-    ds.close()
+    if not filter_polygons:
+        ds = fiona.open(shp_prod[product])
+        crs_outlines = CRS.from_string(ds.crs["init"])
+        polygons = [shape(i["geometry"]) for i in ds]
+        ds.close()
+    else:
+        bound_res = np.minimum(np.diff(x).mean(), np.diff(y).mean()) / 20.0
+        domain = domain_extend_geo_coord(x, y, crs_grid, bound_res,
+                                         domain_ext=1.0)
+        domain_shp = box(domain[0], domain[2], domain[1], domain[3])
+        print("Only consider polygons in the domain: ("
+              + ", ".join(["%.3f" % i for i in domain]) + ")")
+        polygons = []
+        ds = fiona.open(shp_prod[product])
+        crs_outlines = CRS.from_string(ds.crs["init"])
+        for i in ds:
+            polygon_shp = shape(i["geometry"])
+            if domain_shp.intersects(polygon_shp):
+                polygons.append(polygon_shp)
+        print("Selected polygons: " + str(len(polygons)) + "/" + str(len(ds)))
+        ds.close()
 
     # Transform polygons in case geospatial reference systems are different
     if crs_grid == crs_outlines:

@@ -306,6 +306,14 @@ def add_frame_ocean(depth_limit, elevation, x_ver, y_ver, vertices_rshp,
     quads_low : ndarray of int
         Array (two-dimensional; number of quads, 5) with frame quads (lower)"""
 
+    # Check arguments
+    num_quads_ocean = ((elevation[0, :] < 0.0).sum()
+                       + (elevation[-1, :] < 0.0).sum()
+                       + (elevation[:, 0] < 0.0).sum()
+                       + (elevation[:, -1] < 0.0).sum())
+    if num_quads_ocean == 0:
+        raise ValueError("Border domain of 'elevation' does not contain "
+                         + "ocean grid cell(s). Use 'monochrome' frame.")
     if depth_limit > elevation.min():
         print("Warning: 'depth_limit' must be equal or smaller than "
               + "minimal elevation. Reset to %.1f" % elevation.min())
@@ -314,10 +322,6 @@ def add_frame_ocean(depth_limit, elevation, x_ver, y_ver, vertices_rshp,
     # Add 'ocean' vertices
     num_quad_x = elevation.shape[1]
     num_quad_y = elevation.shape[0]
-    num_quads_ocean = ((elevation[0, :] < 0.0).sum()
-                       + (elevation[-1, :] < 0.0).sum()
-                       + (elevation[:, 0] < 0.0).sum()
-                       + (elevation[:, -1] < 0.0).sum())
     vertices_ocean = np.empty((num_quads_ocean * 2, 3), dtype=np.float64)
     ind = 0
     # ----------------------------- Lower border ------------------------------
