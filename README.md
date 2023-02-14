@@ -23,7 +23,7 @@ python -m pip install .
 
 **Known issues**
 
-Under Mac OS X, the current default version of xESMF that is installed with Conda might cause problems. This can be resolved by installed a specific version (xesmf=0.7.0) and adding
+Under **Mac OS X**, the current default version of xESMF that is installed with Conda might cause problems. This can be resolved by installed a specific version (xesmf=0.7.0) and adding
 
 ```bash
 os.environ["ESMFMKFILE"] = "<specify path to file 'esmf.mk'; something like ../miniconda3/envs/terrain3d/lib/esmf.mk>"
