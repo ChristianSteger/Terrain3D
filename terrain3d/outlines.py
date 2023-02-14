@@ -64,7 +64,8 @@ def _download(path_data_root, product):
         print((" Download " + product_info[product]["print"] + " ")
               .center(79, "-"))
         file_zipped = path_data + ".zip"
-        download_file(product_info[product]["url"], file_zipped)
+        terrain3d.auxiliary.download_file(product_info[product]["url"],
+                                          file_zipped)
         with zipfile.ZipFile(file_zipped, "r") as zip_ref:
             zip_ref.extractall(path_data)
         os.remove(file_zipped)
@@ -128,7 +129,7 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         raise ValueError("Value for 'sub_sample_num' out of range [1 - 50]")
 
     # Ensure that required data was downloaded
-    path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
+    path_data_root = terrain3d.auxiliary.get_path_data()
     _download(path_data_root, product)
 
     print((" Compute binary mask for " + product + " outlines ")

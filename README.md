@@ -42,7 +42,7 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **triangles_grid_boxes.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from triangles_grid_boxes.py")
 
-- **columns_rot_coords_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (-> terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
+- **columns_rot_coords_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_rot_coords_gebco.py")
 
 

@@ -8,7 +8,7 @@ import requests
 import numpy as np
 from pyproj import CRS, Transformer
 from matplotlib.colors import ListedColormap
-
+import terrain3d
 
 # -----------------------------------------------------------------------------
 
@@ -263,3 +263,38 @@ def cmap_terrain(elevation, cmap_in, num_cols=256):
     cmap_out = ListedColormap(cols)
 
     return cmap_out
+
+
+# -----------------------------------------------------------------------------
+
+def get_path_data():
+    """Get path for data. Read from text file in 'Terrain3D' main
+        directory if already defined, otherwise define by user.
+
+    Returns
+    -------
+    path_data: str
+        Path of data"""
+
+    # Create text file with path to data
+    file_name = "path_data.txt"
+    path_terrain3d = os.path.join(os.path.split(
+        os.path.dirname(terrain3d.__file__))[0], "terrain3d/")
+    if not os.path.isfile(path_terrain3d + "/" + file_name):
+        valid_path = False
+        print("Provide path for data:")
+        while not valid_path:
+            path_data = os.path.join(input(), "")
+            if os.path.isdir(path_data):
+                valid_path = True
+            else:
+                print("Provided path is invalid - try again:")
+        file = open(path_terrain3d + "/" + file_name, "w")
+        file.write(path_data)
+        file.close()
+    else:
+        file = open(path_terrain3d + "/" + file_name, "r")
+        path_data = file.read()
+        file.close()
+
+    return path_data

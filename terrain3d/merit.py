@@ -10,7 +10,7 @@ import rasterio
 import glob
 from rasterio.merge import merge
 from pyproj import CRS
-
+import terrain3d
 
 # -----------------------------------------------------------------------------
 
@@ -47,7 +47,8 @@ def _download_tile(path_data_root, tile):
         file_url = "http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/" \
                    + "distribute/v1.0.2/" + tile + ".tar"
         file_tar = path_merit + tile + ".tar"
-        download_file(file_url, file_tar, auth=(username, password))
+        terrain3d.auxiliary.download_file(file_url, file_tar,
+                                          auth=(username, password))
         tar = tarfile.open(file_tar)
         tar.extractall(path_merit)
         tar.close()
@@ -94,7 +95,7 @@ def get(domain):
                     int(np.ceil(domain[3] / 30) * 30))
 
     # Ensure that required MERIT tile(s) were/was downloaded
-    path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
+    path_data_root = terrain3d.auxiliary.get_path_data()
     lon_pre = ("w", "e", "e")
     lat_pre = ("s", "n", "n")
     for i in range(domain_30x30[0], domain_30x30[1], 30):

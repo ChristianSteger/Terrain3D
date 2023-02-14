@@ -9,7 +9,7 @@ import xarray as xr
 import time
 import numba as nb
 from pyproj import CRS
-
+import terrain3d
 
 # -----------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ def _download(path_data_root):
             flag = True
         if cont == "yes":
             file_zipped = path_gebco + ".zip"
-            download_file(file_url, file_zipped)
+            terrain3d.auxiliary.download_file(file_url, file_zipped)
             with zipfile.ZipFile(file_zipped, "r") as zip_ref:
                 zip_ref.extractall(path_gebco)
             os.remove(file_zipped)
@@ -205,7 +205,7 @@ def get(agg_num, domain=(-180.0, 180.0, -90.0, 90.0)):
         raise ValueError("Latitude range out of bounds")
 
     # Ensure that GEBCO data was downloaded
-    path_data_root = "/Users/csteger/Dropbox/IAC/Temp/Terrain_3D/data/"
+    path_data_root = terrain3d.auxiliary.get_path_data()
     _download(path_data_root)
 
     # Ensure that GEBCO data with aggregation number exists
