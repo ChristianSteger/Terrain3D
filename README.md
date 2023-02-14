@@ -16,11 +16,11 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **triangles_globe.py**: Visualise entire GEBCO data set on sphere with a triangle mesh. The elevation of quad vertices, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Ice covered quads (land glaciers or ice shelves) are represented as white areas.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Globus.png?raw=true "Output from triangles_globe.py")
 
-- **triangles_switzerland_grid_boxes.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from triangles_switzerland_grid_boxes.py")
+- **triangles_grid_boxes.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from triangles_grid_boxes.py")
 
-- **columns_simple.py**: Simple example to illustrate visualisation of terrain with 'grid cell columns'.
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Column_simple.png?raw=true "Output from columns_simple.py")
+- **columns_rot_coords_gebco.py**: Simple example to illustrate visualisation of terrain with 'grid cell columns'.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_rot_coords_gebco.py")
 
 
 # Digital elevation model and auxiliary data
