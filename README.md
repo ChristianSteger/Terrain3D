@@ -7,7 +7,19 @@ The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarra
 
 # Installation
 
-Terrain3D can be installed via:
+First, create a Conda environment with all the required Python packages:
+
+```bash
+conda create -n terrain3d -c conda-forge numpy scipy matplotlib netcdf4 shapely xarray pyproj cartopy rasterio descartes fiona scikit-image numba xesmf cmcrameri tqdm requests pyvista
+```
+
+and **activate this environment**. The Terrain3D package can then be installed with:
+
+```bash
+git clone https://github.com/ChristianSteger/Terrain3D.git
+cd Terrain3D
+python -m pip install .
+```
 
 # Visualisation
 
