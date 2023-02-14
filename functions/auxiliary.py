@@ -6,6 +6,7 @@ import os
 from tqdm import tqdm
 import requests
 import numpy as np
+from pyproj import CRS, Transformer
 
 
 # -----------------------------------------------------------------------------
@@ -123,3 +124,107 @@ def aggregate_dem(x, y, elevation, agg_num):
     elevation_agg /= float(agg_num * agg_num)
 
     return x_agg, y_agg, elevation_agg
+
+
+# -----------------------------------------------------------------------------
+
+def gridcoord(x_cent, y_cent):
+    """Compute edge coordinates from grid cell centre coordinates.
+
+    Parameters
+    ----------
+    x_cent: array_like
+        Array (one-dimensional) with x-coordinates of grid centres [arbitrary]
+    y_cent: array_like
+        Array (one-dimensional) with y-coordinates of grid centres [arbitrary]
+
+    Returns
+    -------
+    x_edge: array_like
+        Array (one-dimensional) with x-coordinates of grid edges [arbitrary]
+    y_edge: array_like
+        Array (one-dimensional) with y-coordinates of grid edges [arbitrary]"""
+
+    # Check input arguments
+    if len(x_cent.shape) != 1 or len(y_cent.shape) != 1:
+        raise TypeError("number of dimensions of input arrays is not 1")
+    if (np.any(np.diff(np.sign(np.diff(x_cent))) != 0) or
+            np.any(np.diff(np.sign(np.diff(y_cent))) != 0)):
+        sys.exit("input arrays are not monotonically in- or decreasing")
+
+    # Compute grid spacing if not provided
+    dx = np.diff(x_cent).mean()
+    dy = np.diff(y_cent).mean()
+
+    # Compute grid coordinates
+    x_edge = np.hstack((x_cent[0] - (dx / 2.),
+                        x_cent[:-1] + np.diff(x_cent) / 2.,
+                        x_cent[-1] + (dx / 2.))).astype(x_cent.dtype)
+    y_edge = np.hstack((y_cent[0] - (dy / 2.),
+                        y_cent[:-1] + np.diff(y_cent) / 2.,
+                        y_cent[-1] + (dy / 2.))).astype(y_cent.dtype)
+
+    return x_edge, y_edge
+
+
+# -----------------------------------------------------------------------------
+
+def domain_extend_geo_coord(x_cent, y_cent, crs_proj, bound_res,
+                            domain_ext=0.1):
+    """Compute a domain in geographic coordinates (WGS84) required to
+    conservatively remap from this domain to the map projection domain.
+
+    Parameters
+    ----------
+    x_cent : ndarray of float/double [degree or m]
+        Array with x-coordinates of map projection
+    y_cent : ndarray of float/double [degree or m]
+        Array with y-coordinates of map projection
+    crs_proj : pyproj.crs.crs.CRS
+        Geospatial reference of map projection
+    bound_res : float
+        Resolution of boundary [degree or m]
+    domain_ext : float
+        Domain extension ('safety' margin for remapping) [degree]
+
+    Returns
+    -------
+    domain : tuple
+        Boundaries of domain (lon_min, lon_max, lat_min, lat_max) in WGS84
+        [degree]"""
+
+    # Check arguments
+    if (not np.all(np.diff(x_cent) > 0.0)) \
+            or (not np.all(np.diff(y_cent) > 0.0)):
+        sys.exit("Both input coordinates array must contain monotonically "
+                 + "increasing values")
+    if bound_res > np.minimum(np.diff(x_cent).mean(), np.diff(y_cent).mean()):
+        raise ValueError("'bound_res' must be equal or smaller than minimal"
+                         + " resolution of 'x_cent' and 'y_cent'")
+
+    # Compute required domain
+    x_lim = (x_cent[0] - np.diff(x_cent).mean() / 2.0,
+             x_cent[-1] + np.diff(x_cent).mean() / 2.0)
+    y_lim = (y_cent[0] - np.diff(y_cent).mean() / 2.0,
+             y_cent[-1] + np.diff(y_cent).mean() / 2.0)
+    x_edge = np.linspace(x_lim[0], x_lim[1],
+                         int(np.ceil((x_lim[1] - x_lim[0]) / bound_res)))
+    y_edge = np.linspace(y_lim[0], y_lim[1],
+                         int(np.ceil((y_lim[1] - y_lim[0]) / bound_res)))
+    x_bound = np.hstack((x_edge,
+                         np.repeat(x_edge[-1], len(y_edge))[1:],
+                         x_edge[::-1][1:],
+                         np.repeat(x_edge[0], len(y_edge))[1:]))
+    y_bound = np.hstack((np.repeat(y_edge[0], len(x_edge)),
+                         y_edge[1:],
+                         np.repeat(y_edge[-1], len(x_edge))[1:],
+                         y_edge[::-1][1:]))
+    transformer = Transformer.from_crs(crs_proj, CRS.from_epsg(4326),
+                                       always_xy=True)
+    lon_bound, lat_bound = transformer.transform(x_bound, y_bound)
+    domain = [lon_bound.min() - domain_ext,
+              lon_bound.max() + domain_ext,
+              lat_bound.min() - domain_ext,
+              lat_bound.max() + domain_ext]
+
+    return domain
