@@ -1,5 +1,7 @@
-# Description: Simple example to illustrate visualisation of terrain with 'grid
-#              cell columns'
+# Description: Visualise GEBCO data set with 'grid cell columns' (-> terrain
+#              representation in climate models). The elevation of grid cells,
+#              which are below sea level and are land according to the GSHHG
+#              data base, are set to 0.0 m. Lakes can optionally be displayed.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
 # MIT License
