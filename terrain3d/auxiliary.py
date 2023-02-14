@@ -7,6 +7,7 @@ from tqdm import tqdm
 import requests
 import numpy as np
 from pyproj import CRS, Transformer
+from matplotlib.colors import ListedColormap
 
 
 # -----------------------------------------------------------------------------
@@ -228,3 +229,37 @@ def domain_extend_geo_coord(x_cent, y_cent, crs_proj, bound_res,
               lat_bound.max() + domain_ext]
 
     return domain
+
+
+# -----------------------------------------------------------------------------
+
+def cmap_terrain(elevation, cmap_in, num_cols=256):
+    """Adapt terrain colormap to make it suitable for PyVista.
+
+    Parameters
+    ----------
+    elevation : ndarray of float/double
+        Array with elevation of DEM [arbitrary]
+    cmap_in : matplotlib.colors.ListedColormap
+        Colormap suitable for terrain representation (lower half ocean and
+        upper half land terrain; like 'cmcrameri.cm.bukavu')
+    num_cols : int
+        Number of colours
+
+    Returns
+    -------
+    cmap_out : matplotlib.colors.ListedColormap
+        Colormap adapted for use in PyVista"""
+
+    mapping = np.linspace(elevation.min(), elevation.max(), num_cols)
+    cols = np.empty((num_cols, 4), dtype=np.float32)
+    for i in range(num_cols):
+        if mapping[i] < 0.0:
+            val = (1.0 - mapping[i] / mapping[0]) / 2.0
+            cols[i, :] = cmap_in(val)
+        else:
+            val = (mapping[i] / mapping[-1]) / 2.0 + 0.5
+            cols[i, :] = cmap_in(val)
+    cmap_out = ListedColormap(cols)
+
+    return cmap_out

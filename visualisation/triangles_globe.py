@@ -8,7 +8,6 @@
 # MIT License
 
 # Load modules
-import sys
 import os
 import numpy as np
 import vtk
@@ -19,16 +18,11 @@ from pyproj import Transformer
 from scipy import interpolate
 import time
 from matplotlib.colors import ListedColormap
+import terrain3d
 # import matplotlib.pyplot as plt
 # import matplotlib as mpl
 #
 # mpl.style.use("classic")
-
-# Load required functions
-sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
-from gebco import get as get_gebco
-from outlines import binary_mask as binary_mask_outlines
-from triangles import get_quad_indices
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -59,7 +53,7 @@ print("Dimensions of interpolated GEBCO data: "
       + str(lat_ver.size) + " x " + str(lon_ver.size))
 
 # Get GEBCO data
-lon_in, lat_in, elevation_in, crs_in = get_gebco(gebco_agg_num)
+lon_in, lat_in, elevation_in, crs_in = terrain3d.gebco.get(gebco_agg_num)
 print("Dimensions of input GEBCO data: "
       + str(lat_in.size) + " x " + str(lon_in.size))
 
@@ -72,12 +66,12 @@ elevation_ver = f_ip_rbs(lat_ver, lon_ver).astype(np.float32)
 print("GEBCO data interpolated (%.1f" % (time.time() - t_beg) + " s)")
 
 # Set elevation of quad vertices, which are land and below sea level, to 0.0 m
-mask_land = binary_mask_outlines("shorelines", lon_ver, lat_ver, crs_in,
-                                 resolution="intermediate", level=1,
-                                 sub_sample_num=1)
-mask_lakes = binary_mask_outlines("shorelines", lon_ver, lat_ver, crs_in,
-                                  resolution="intermediate", level=2,
-                                  sub_sample_num=1)
+mask_land = terrain3d.outlines.binary_mask(
+    "shorelines", lon_ver, lat_ver, crs_in, resolution="intermediate", level=1,
+    sub_sample_num=1)
+mask_lakes = terrain3d.outlines.binary_mask(
+    "shorelines", lon_ver, lat_ver, crs_in, resolution="intermediate", level=2,
+    sub_sample_num=1)
 mask_land[mask_lakes] = False
 mask_lbsl = (elevation_ver < 0.0) & mask_land  # mask with land below sea level
 elevation_ver[mask_lbsl] = 0.0
@@ -117,18 +111,18 @@ print("Convert geographic to cartesian coordinates "
 t_beg = time.time()
 num_quad_lon = num_ver_lon - 1
 num_quad_lat = num_ver_lat - 1
-quad_indices = get_quad_indices(num_ver_lon, num_ver_lat)
+quad_indices = terrain3d.triangles.get_quad_indices(num_ver_lon, num_ver_lat)
 print("Create quad vertices array (%.1f" % (time.time() - t_beg) + " s)")
 
 # Create mask for glaciated area (for quads)
 lon_quad = lon_ver[:-1] + np.diff(lon_ver) / 2.0
 lat_quad = lat_ver[:-1] + np.diff(lat_ver) / 2.0
 mask_ice = np.zeros((num_quad_lat, num_quad_lon), dtype=bool)
-mask_glacier_land = binary_mask_outlines("glacier_land", lon_quad, lat_quad,
-                                         crs_in, sub_sample_num=1)
+mask_glacier_land = terrain3d.outlines.binary_mask(
+    "glacier_land", lon_quad, lat_quad, crs_in, sub_sample_num=1)
 mask_ice[mask_glacier_land] = True
-mask_ice_shelves = binary_mask_outlines("antarctic_ice_shelves", lon_quad,
-                                        lat_quad, crs_in, sub_sample_num=1)
+mask_ice_shelves = terrain3d.outlines.binary_mask(
+    "antarctic_ice_shelves", lon_quad, lat_quad, crs_in, sub_sample_num=1)
 mask_ice[mask_ice_shelves] = True
 del mask_glacier_land, mask_ice_shelves
 
@@ -165,20 +159,7 @@ grid_ice = pv.UnstructuredGrid(quad_sel.ravel(), cell_types, vertices)
 # Visualise data
 # -----------------------------------------------------------------------------
 
-# Colormap
-num_cols = 256
-mapping = np.linspace(elevation_ver.min(), elevation_ver.max(), num_cols)
-cols = np.empty((num_cols, 4), dtype=np.float32)
-for i in range(num_cols):
-    if mapping[i] < 0.0:
-        val = (1.0 - mapping[i] / mapping[0]) / 2.0
-        cols[i, :] = cm.bukavu(val)
-    else:
-        val = (mapping[i] / mapping[-1]) / 2.0 + 0.5
-        cols[i, :] = cm.bukavu(val)
-colormap = ListedColormap(cols)
-
-# Plot
+colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
 pl = pv.Plotter(window_size=[1000, 1000])
 col_bar_args = dict(height=0.25, vertical=True, position_x=0.8, position_y=0.1)
 pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, label="1",

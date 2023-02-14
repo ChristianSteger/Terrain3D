@@ -2,7 +2,6 @@
 # MIT License
 
 # Load modules
-import sys
 import os
 import zipfile
 import numpy as np
@@ -15,17 +14,7 @@ from rasterio.transform import Affine
 from rasterio.features import rasterize
 from pyproj import CRS
 from pyproj import Transformer
-# import matplotlib.pyplot as plt
-# import matplotlib as mpl
-# from descartes import PolygonPatch
-#
-# mpl.style.use("classic")
-
-# Load required functions
-sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
-from auxiliary import download_file
-from auxiliary import domain_extend_geo_coord
-
+import terrain3d
 
 # -----------------------------------------------------------------------------
 
@@ -165,8 +154,8 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         ds.close()
     else:
         bound_res = np.minimum(np.diff(x).mean(), np.diff(y).mean()) / 20.0
-        domain = domain_extend_geo_coord(x, y, crs_grid, bound_res,
-                                         domain_ext=1.0)
+        domain = terrain3d.auxiliary.domain_extend_geo_coord(
+            x, y, crs_grid, bound_res, domain_ext=1.0)
         domain_shp = box(domain[0], domain[2], domain[1], domain[3])
         print("Only consider polygons in the domain: ("
               + ", ".join(["%.3f" % i for i in domain]) + ")")
@@ -226,13 +215,5 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         mask_bin = (data_agg_yx >= ((sub_sample_num * sub_sample_num) / 2.0)) \
             .astype(np.uint8)
     print("Processing time: %.1f" % (time.time() - t_beg) + " s")
-
-    # # Test plot
-    # plt.figure()
-    # ax = plt.axes()
-    # plt.pcolormesh(x, y, mask_bin)
-    # for i in polygons[:10]:
-    #     poly = PolygonPatch(i, facecolor="none", edgecolor="yellow")
-    #     ax.add_patch(poly)
 
     return mask_bin.astype(bool)

@@ -2,7 +2,6 @@
 # MIT License
 
 # Load modules
-import sys
 import os
 import zipfile
 import numpy as np
@@ -10,10 +9,6 @@ import xarray as xr
 import time
 import numba as nb
 from pyproj import CRS
-
-# Load required functions
-sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
-from auxiliary import download_file
 
 
 # -----------------------------------------------------------------------------

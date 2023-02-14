@@ -8,53 +8,45 @@
 
 # Load modules
 import os
-import sys
 import numpy as np
 import vtk
 import pyvista as pv
-os.environ["ESMFMKFILE"] = "/Users/csteger/miniconda3/envs/pyvista/lib/esmf.mk"
-# os.environ["ESMFMKFILE"] = "/Users/csteger/opt/miniconda3/envs/pyvista/lib/esmf.mk"
+path_esmf = "/Users/csteger/miniconda3/envs/pyvista/lib/esmf.mk" # MacBook
+# path_esmf = "/Users/csteger/opt/miniconda3/envs/pyvista/lib/esmf.mk" # Deskt.
+os.environ["ESMFMKFILE"] = path_esmf
 import xesmf as xe
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import xarray as xr
 from pyproj import CRS, Transformer
 from cmcrameri import cm
-from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
 from skimage.measure import label
+import terrain3d
 
 mpl.style.use("classic")
-
-# Load required functions
-sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
-from gebco import get as get_gebco
-from columns import get_vertices, get_quads
-from columns import add_frame_monochrome, add_frame_ocean
-from auxiliary import gridcoord, domain_extend_geo_coord
-from outlines import binary_mask as binary_mask_outlines
 
 # -----------------------------------------------------------------------------
 # Settings
 # -----------------------------------------------------------------------------
 
-# # Switzerland (~1 km)
-# pole_lon = -170.0  # longitude of rotated pole [degree]
-# pole_lat = 43.0  # latitude of rotated pole [degree]
-# cent_rot_lon = 0.0  # longitude rotation about the new pole [degree]
-# d_rlon = 0.01  # grid spacing in rotated longitude direction [degree]
-# d_rlat = 0.01  # grid spacing in rotated latitude direction [degree]
-# rlon_0 = -3.1  # rotated longitude of lower left grid cell centre [degree]
-# rlat_0 = -1.45  # rotated latitude of lower left grid cell centre [degree]
-# rlon_len = 380  # number of grid cells in rotated longitude direction
-# rlat_len = 260  # number of grid cells in rotated latitude direction
-# terrain_exag_fac = 5.0  # terrain exaggeration factor [-]
-# depth_limit = -1500.0
-# gebco_agg_num = 1  # aggregation number of input GEBCO data [-]
-# frame = None  # None, "monochrome", "ocean"
-# show_lakes = True  # represent lakes as blue areas
+# Switzerland (~1 km)
+pole_lon = -170.0  # longitude of rotated pole [degree]
+pole_lat = 43.0  # latitude of rotated pole [degree]
+cent_rot_lon = 0.0  # longitude rotation about the new pole [degree]
+d_rlon = 0.01  # grid spacing in rotated longitude direction [degree]
+d_rlat = 0.01  # grid spacing in rotated latitude direction [degree]
+rlon_0 = -3.1  # rotated longitude of lower left grid cell centre [degree]
+rlat_0 = -1.45  # rotated latitude of lower left grid cell centre [degree]
+rlon_len = 380  # number of grid cells in rotated longitude direction
+rlat_len = 260  # number of grid cells in rotated latitude direction
+terrain_exag_fac = 5.0  # terrain exaggeration factor [-]
+depth_limit = -1500.0
+gebco_agg_num = 1  # aggregation number of input GEBCO data [-]
+frame = None  # None, "monochrome", "ocean"
+show_lakes = True  # represent lakes as blue areas
 
 # # Switzerland (~2 km)
 # pole_lat = 43.0
@@ -104,21 +96,21 @@ from outlines import binary_mask as binary_mask_outlines
 # frame = "ocean"  # None, "monochrome", "ocean"
 # show_lakes = False
 
-# Southeastern Tibet (~4 km)
-pole_lat = 61.0
-pole_lon = -63.7
-cent_rot_lon = 0.0
-d_rlon = 0.04
-d_rlat = 0.04
-rlon_0 = -23.8
-rlat_0 = -9.1
-rlon_len = 400
-rlat_len = 360
-terrain_exag_fac = 10.0
-depth_limit = -2800.0
-gebco_agg_num = 4
-frame = "ocean"
-show_lakes = False
+# # Southeastern Tibet (~4 km)
+# pole_lat = 61.0
+# pole_lon = -63.7
+# cent_rot_lon = 0.0
+# d_rlon = 0.04
+# d_rlat = 0.04
+# rlon_0 = -23.8
+# rlat_0 = -9.1
+# rlon_len = 400
+# rlat_len = 360
+# terrain_exag_fac = 10.0
+# depth_limit = -2800.0
+# gebco_agg_num = 4
+# frame = "ocean"
+# show_lakes = False
 
 # General settings
 plot_sel_dom = False  # plot domain selection
@@ -136,7 +128,7 @@ crs_rot = CRS.from_user_input(
 )
 rlon = np.linspace(rlon_0, rlon_0 + (rlon_len - 1) * d_rlon, rlon_len)
 rlat = np.linspace(rlat_0, rlat_0 + (rlat_len - 1) * d_rlat, rlat_len)
-rlon_edge, rlat_edge = gridcoord(rlon, rlat)
+rlon_edge, rlat_edge = terrain3d.auxiliary.gridcoord(rlon, rlat)
 
 # Check extent of select domain
 if plot_sel_dom:
@@ -155,15 +147,15 @@ if plot_sel_dom:
                    rlat_co[1] - 0.5, rlat_co[2] + 0.5])
 
 # Compute domain for required GEBCO data
-dom_gebco = domain_extend_geo_coord(rlon, rlat, crs_rot, bound_res=0.001,
-                                    domain_ext=0.1)
+dom_gebco = terrain3d.auxiliary.domain_extend_geo_coord(
+    rlon, rlat, crs_rot, bound_res=0.001, domain_ext=0.1)
 
 # Load GEBCO data
-lon_in, lat_in, elevation_in, crs_dem = get_gebco(gebco_agg_num,
-                                                  domain=dom_gebco)
+lon_in, lat_in, elevation_in, crs_dem = terrain3d.gebco.get(gebco_agg_num,
+                                                            domain=dom_gebco)
 
 # Remap elevation data to rotated grid
-lon_in_edge, lat_in_edge = gridcoord(lon_in, lat_in)
+lon_in_edge, lat_in_edge = terrain3d.auxiliary.gridcoord(lon_in, lat_in)
 grid_in = xr.Dataset({"lat": (["lat"], lat_in),
                       "lon": (["lon"], lon_in),
                       "lat_b": (["lat_b"], lat_in_edge),
@@ -184,9 +176,10 @@ elevation_in = regridder(elevation_in.astype(np.float32))
 print("Elapsed time: %.1f" % (time.time() - t_beg) + " s")
 
 # Compute land-sea mask
-mask_land = binary_mask_outlines("shorelines", rlon, rlat, crs_rot,
-                                 resolution="intermediate", level=1,
-                                 sub_sample_num=10, filter_polygons=True)
+mask_land = terrain3d.outlines.binary_mask("shorelines", rlon, rlat, crs_rot,
+                                           resolution="intermediate", level=1,
+                                           sub_sample_num=10,
+                                           filter_polygons=True)
 mask = mask_land & (elevation_in < 0.0)
 print("Ocean-land-inconsistency: increase elevation of " + str(mask.sum())
       + " grid cells to 0.0 m")
@@ -197,9 +190,9 @@ elevation_in[mask] = 0.0
 if not show_lakes:
     mask_lake = np.zeros(elevation_in.shape, dtype=bool)
 else:
-    mask_lake = binary_mask_outlines("shorelines", rlon, rlat, crs_rot,
-                                     resolution="full", level=2,
-                                     sub_sample_num=10)
+    mask_lake = terrain3d.outlines.binary_mask(
+        "shorelines", rlon, rlat, crs_rot, resolution="full", level=2,
+        sub_sample_num=10)
     if lake_elev_equal:
         lakes_con, num_labels = label(mask_lake.astype(int), background=0,
                                       connectivity=2, return_num=True)
@@ -223,22 +216,23 @@ elevation_pad_0 = elevation_pad_0.clip(min=0.0)
 # (-> 'cell_data', which is used for colouring, uses unmodified 'elevation')
 
 # Compute vertices for grid cell columns
-vertices = get_vertices(x_ver, y_ver, elevation_pad_0)
+vertices = terrain3d.columns.get_vertices(x_ver, y_ver, elevation_pad_0)
 shp_ver = vertices.shape
 vertices_rshp = vertices.reshape((y_ver.size * x_ver.size * 4), 3)
 
 # Compute quads for grid cell columns
-quads, cell_data, column_index = get_quads(elevation, elevation_pad_0, shp_ver)
+quads, cell_data, column_index \
+    = terrain3d.columns.get_quads(elevation, elevation_pad_0, shp_ver)
 
 # Compute vertices/quads for frame (optional)
 if frame == "monochrome":
     vertices_rshp, quads_low \
-        = add_frame_monochrome(depth_limit, elevation, x_ver, y_ver,
-                               vertices_rshp, shp_ver)
+        = terrain3d.columns.add_frame_monochrome(depth_limit, elevation, x_ver,
+                                                 y_ver, vertices_rshp, shp_ver)
 elif frame == "ocean":
     vertices_rshp, quads_ocean, cell_data_ocean, quads_low \
-        = add_frame_ocean(depth_limit, elevation, x_ver, y_ver, vertices_rshp,
-                          shp_ver)
+        = terrain3d.columns.add_frame_ocean(depth_limit, elevation, x_ver,
+                                            y_ver, vertices_rshp, shp_ver)
     quads = np.vstack((quads, quads_ocean))
     cell_data = np.append(cell_data, cell_data_ocean)
 
@@ -276,20 +270,7 @@ if frame in ("monochrome", "ocean"):
 # Visualise data
 # -----------------------------------------------------------------------------
 
-# Colormap
-num_cols = 256
-mapping = np.linspace(elevation.min(), elevation.max(), num_cols)
-cols = np.empty((num_cols, 4), dtype=np.float32)
-for i in range(num_cols):
-    if mapping[i] < 0.0:
-        val = (1.0 - mapping[i] / mapping[0]) / 2.0
-        cols[i, :] = cm.bukavu(val)
-    else:
-        val = (mapping[i] / mapping[-1]) / 2.0 + 0.5
-        cols[i, :] = cm.bukavu(val)
-colormap = ListedColormap(cols)
-
-# Plot
+colormap = terrain3d.auxiliary.cmap_terrain(elevation, cm.bukavu)
 pl = pv.Plotter()
 pl.add_mesh(grid, cmap=colormap, show_edges=False, label="1",
             edge_color="black", line_width=5, show_scalar_bar=False)

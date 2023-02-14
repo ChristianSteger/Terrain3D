@@ -7,7 +7,6 @@
 
 # Load modules
 import os
-import sys
 import numpy as np
 import vtk
 import pyvista as pv
@@ -17,18 +16,11 @@ import time
 from pyproj import CRS
 from pyproj import Transformer
 from skimage.measure import label
+import terrain3d
 # import matplotlib.pyplot as plt
 # import matplotlib as mpl
 #
 # mpl.style.use("classic")
-
-# Load required functions
-sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
-from gebco import get as get_gebco
-from merit import get as get_merit
-from outlines import binary_mask as binary_mask_outlines
-from triangles import get_quad_indices
-from auxiliary import aggregate_dem
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -49,12 +41,13 @@ domain = (7.9, 10.0, 46.25, 47.25)  # Central/Eastern Switzerland
 # Get data (GEBCO or MERIT)
 if dem == "GEBCO":
     lon_ver, lat_ver, elevation_ver, crs_dem \
-        = get_gebco(agg_num, domain)  # GEBCO
+        = terrain3d.gebco.get(agg_num, domain)  # GEBCO
 elif dem == "MERIT":
-    lon_ver, lat_ver, elevation_ver, crs_dem = get_merit(domain)
+    lon_ver, lat_ver, elevation_ver, crs_dem = terrain3d.merit.get(domain)
     if agg_num > 1:
         lon_ver, lat_ver, elevation_ver \
-            = aggregate_dem(lon_ver, lat_ver, elevation_ver, agg_num)
+            = terrain3d.auxiliary.aggregate_dem(lon_ver, lat_ver,
+                                                elevation_ver, agg_num)
 else:
     raise ValueError("Unknown DEM")
 
@@ -62,9 +55,9 @@ else:
 if show_lakes:
     lon_quad = lon_ver[:-1] + np.diff(lon_ver) / 2.0
     lat_quad = lat_ver[:-1] + np.diff(lat_ver) / 2.0
-    mask_lake = binary_mask_outlines("shorelines", lon_quad, lat_quad, crs_dem,
-                                     resolution="full", level=2,
-                                     sub_sample_num=5)
+    mask_lake = terrain3d.outlines.binary_mask(
+        "shorelines", lon_quad, lat_quad, crs_dem, resolution="full", level=2,
+        sub_sample_num=5)
 
     # # Test plot
     # plt.figure()
@@ -87,7 +80,7 @@ x, y, z = transformer.transform(*np.meshgrid(lon_ver, lat_ver),
 # Create indices array for quad vertices
 num_quad_x = len(lon_ver) - 1
 num_quad_y = len(lat_ver) - 1
-quad_indices = get_quad_indices(len(lon_ver), len(lat_ver))
+quad_indices = terrain3d.triangles.get_quad_indices(len(lon_ver), len(lat_ver))
 
 # Reshape arrays
 vertices = np.hstack((x.ravel()[:, np.newaxis],
@@ -122,19 +115,6 @@ if show_lakes:
 # Visualise data
 # -----------------------------------------------------------------------------
 
-# Colormap
-num_cols = 256
-mapping = np.linspace(elevation_ver.min(), elevation_ver.max(), num_cols)
-cols = np.empty((num_cols, 4), dtype=np.float32)
-for i in range(num_cols):
-    if mapping[i] < 0.0:
-        val = (1.0 - mapping[i] / mapping[0]) / 2.0
-        cols[i, :] = cm.bukavu(val)
-    else:
-        val = (mapping[i] / mapping[-1]) / 2.0 + 0.5
-        cols[i, :] = cm.bukavu(val)
-colormap = ListedColormap(cols)
-
 # Create 'idealised' wire frame that represent GCM/RCM grid
 x_wire = np.arange(-55000.0, 80000.0, 25000.0, dtype=np.float32)
 y_wire = np.arange(-30000.0, 65000.0, 25000.0, dtype=np.float32)
@@ -147,6 +127,7 @@ slic = (slice(-2, None), slice(-2, None), slice(None))  # upper right
 wire_ur = pv.StructuredGrid(x[slic], y[slic], z[slic]).extract_all_edges()
 
 # Plot
+colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
 pl = pv.Plotter(window_size=[1000, 1000])
 col_bar_args = dict(height=0.25, vertical=True, position_x=0.8, position_y=0.1)
 pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, label="1",

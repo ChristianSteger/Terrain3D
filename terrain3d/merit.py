@@ -2,7 +2,6 @@
 # MIT License
 
 # Load modules
-import sys
 import os
 import tarfile
 import numpy as np
@@ -11,10 +10,6 @@ import rasterio
 import glob
 from rasterio.merge import merge
 from pyproj import CRS
-
-# Load required functions
-sys.path.append("/Users/csteger/Downloads/Terrain3D/functions/")
-from auxiliary import download_file
 
 
 # -----------------------------------------------------------------------------
