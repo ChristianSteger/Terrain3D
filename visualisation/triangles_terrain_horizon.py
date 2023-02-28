@@ -1,7 +1,9 @@
-# Description: Visualise MERIT data for subregion in Switzerland with
-#              a triangle mesh. Use a planar map projection and visualise
-#              computation of terrain horizon according to the HORAYZON
-#              algorithm.
+# Description: Visualise MERIT data for a subregion in Switzerland with
+#              a triangle mesh on a planar map projection. Illustrate the
+#              algorithm to compute terrain horizon (according to the HORAYZON
+#              package; https://doi.org/10.5194/gmd-15-6817-2022) in an
+#              animation. Combining the invividual images of the animation into
+#              a movie or GiF requires 'FFmpeg' or 'ImageMagick', respecitvely.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
 # MIT License
@@ -16,8 +18,8 @@ from pyproj import CRS
 from pyproj import Transformer
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import subprocess
 import glob
+from PIL import Image
 import terrain3d
 
 mpl.style.use("classic")
@@ -32,7 +34,7 @@ domain = ( 9.231788 - 0.2, 9.231788 + 0.2,
 dist_search = 10000.0  # search distance for terrain horizon [m]
 hori_acc = np.deg2rad(1.0)  # accuracy of horizon computation [degree]
 azim_num = 24  # number of azimuth sectors [-]
-path_out = "/Users/csteger/Desktop/3D_images/"  # output directory
+path_out = "/Users/csteger/Desktop/PyVista_ray_tracing/"  # output directory
 
 
 # -----------------------------------------------------------------------------
@@ -243,7 +245,7 @@ fig.savefig(path_out + "Horizon_angle_and_distance.png", dpi=300,
             bbox_inches="tight")
 plt.close(fig)
 
-# Plot steps
+# Plot and save individual images
 colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
 camera_position = \
     [(-25430.556484989338, -53353.24821086885, 46453.6498944145),
@@ -251,7 +253,7 @@ camera_position = \
      (0.12262671008113055, 0.5831885581520082, 0.8030278921776381)]
 for i in list(data.keys()):
     # -------------------------------------------------------------------------
-    pl = pv.Plotter(window_size=[2500, 2500])
+    pl = pv.Plotter(window_size=[3000, 2500])
     pl.add_mesh(grid, scalars="Surface elevation", show_edges=False,
                 edge_color="black", line_width=0, cmap=colormap)
     # -------------------------------------------------------------------------
@@ -276,19 +278,21 @@ for i in list(data.keys()):
     pl.close()
 
 # Crop images (optional)
-files = glob.glob(path_out + "fig_???.png")
-files.sort()
-print("Number of files: " + str(len(files)))
-if not os.path.isdir(path_out + "cropped/"):
-    os.mkdir(path_out + "cropped/")
-for i in files:
-    cmd = ("convert", "-crop 2500x1900+0+600")
-    sf = i
-    tf = path_out + "cropped/" + i.split("/")[-1]
-    subprocess.call(cmd[0] + " " + sf + " " + cmd[1] + " " + tf, shell = True)
-    # os.remove(sf)
+images = glob.glob(path_out + "fig_???.png")
+images.sort()
+if (len(images) != len(data)):
+    raise ValueError("Images incomplete")
+os.mkdir(path_out + "cropped/")
+box = (200, 600, 3000, 2500)  # left, upper, right, lower
+for i in images:
+    im = Image.open(i)
+    im.crop(box).save(path_out + "cropped/" + i.split("/")[-1], quality=100)
 
-# Create movie from images:
-# ffmpeg -framerate 2 -i fig_%03d.png -c:v libx264 -r 30 -pix_fmt yuv420p out2.mp4  # slowest
-# ffmpeg -framerate 3 -i fig_%03d.png -c:v libx264 -r 30 -pix_fmt yuv420p out3.mp4
-# ffmpeg -framerate 4 -i fig_%03d.png -c:v libx264 -r 30 -pix_fmt yuv420p out4.mp4  # fastest
+# Create movie from images (requires 'FFmpeg')
+# ffmpeg -framerate 3 -i fig_%03d.png -c:v libx264 -r 30 -pix_fmt yuv420p
+# terrain_horizon.mp4
+# slow down movie: '-framerate 2', accelerate movie: '-framerate 4'
+
+# Create GIF from images (requires 'ImageMagick')
+# convert -delay 50 -loop 0 fig_???.png terrain_horizon.gif  # slow
+# mogrify -layers 'optimize' -fuzz 7% terrain_horizon.gif    # compress
