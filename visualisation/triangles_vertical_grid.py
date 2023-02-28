@@ -1,6 +1,6 @@
 # Description: Visualise GEBCO or MERIT data for subregion in Switzerland with
 #              a triangle mesh. Use a planar map projection and display
-#              'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
+#              'idealised' vertical grid of a GCM/RCM. Optionally display lakes.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
 # MIT License
@@ -115,7 +115,7 @@ if show_lakes:
 # Visualise data
 # -----------------------------------------------------------------------------
 
-# Create 'idealised' wire frame that represent GCM/RCM grid
+# Create wire frame that represent 'idealised' vertical grid of GCM/RCM
 x_wire = np.arange(-55000.0, 80000.0, 25000.0, dtype=np.float32)
 y_wire = np.arange(-30000.0, 65000.0, 25000.0, dtype=np.float32)
 z_wire = np.arange(0.0, 20001.0, 5000.0, dtype=np.float32) * ter_exa_fac
