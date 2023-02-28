@@ -45,7 +45,7 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **columns_rot_coords_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_rot_coords_gebco.py")
 
-- **triangles_terrain_horizon.py**: Visualise MERIT data for a subregion in Switzerland with a triangle mesh on a planar map projection. Illustrate the algorithm to compute terrain horizon (according to the [HORAYZON package](https://doi.org/10.5194/gmd-15-6817-2022)) in an animation. Combining the invividual images of the animation into a movie or GiF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
+- **triangles_terrain_horizon.py**: Visualise MERIT data for a subregion in Switzerland with a triangle mesh on a planar map projection. Illustrate the algorithm to compute terrain horizon (according to [HORAYZON](https://doi.org/10.5194/gmd-15-6817-2022)) in an animation. Combining the invividual images of the animation into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_terrain_horizon.gif?raw=true "Output from triangles_terrain_horizon.py")
 
 # Digital elevation model and auxiliary data

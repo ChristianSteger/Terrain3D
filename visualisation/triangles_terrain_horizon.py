@@ -1,9 +1,9 @@
 # Description: Visualise MERIT data for a subregion in Switzerland with
 #              a triangle mesh on a planar map projection. Illustrate the
-#              algorithm to compute terrain horizon (according to the HORAYZON
-#              package; https://doi.org/10.5194/gmd-15-6817-2022) in an
-#              animation. Combining the invividual images of the animation into
-#              a movie or GiF requires 'FFmpeg' or 'ImageMagick', respecitvely.
+#              algorithm to compute terrain horizon (according to HORAYZON;
+#              https://doi.org/10.5194/gmd-15-6817-2022) in an animation.
+#              Combining the invividual images of the animation into a movie
+#              or GIF requires 'FFmpeg' or 'ImageMagick', respecitvely.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
 # MIT License
