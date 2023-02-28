@@ -34,7 +34,8 @@ domain = ( 9.231788 - 0.2, 9.231788 + 0.2,
 dist_search = 10000.0  # search distance for terrain horizon [m]
 hori_acc = np.deg2rad(1.0)  # accuracy of horizon computation [degree]
 azim_num = 24  # number of azimuth sectors [-]
-path_out = "/Users/csteger/Desktop/PyVista_ray_tracing/"  # output directory
+path_out = "/Users/csteger/Desktop/PyVista_terrain_horizon/"
+# output directory
 
 
 # -----------------------------------------------------------------------------
@@ -207,45 +208,23 @@ cell_types[:] = vtk.VTK_QUAD
 grid = pv.UnstructuredGrid(quad_indices.ravel(), cell_types, vertices)
 grid.point_data["Surface elevation"] = elevation_ver.ravel()
 
-# -----------------------------------------------------------------------------
-# Perform ray tracing and visualise steps
-# -----------------------------------------------------------------------------
-
 # Observer (-> location for which horizon is computed)
 ind_0 = int(x.shape[0] / 2)
 ind_1 = int(x.shape[1] / 2)
 observer = np.array([x[ind_0, ind_1], y[ind_0, ind_1],
                      z[ind_0, ind_1] + 1.0])
 
-# Compute terrain horizon
+# Compute terrain horizon (-- perform ray tracing)
 data, hori_loc, hori_elev, hori_dist \
     = terrain_horizon(vertices, quad_indices, observer, hori_acc,
                       azim_num, dist_search)
 print("Number of steps: " + str(len(data)))
 
-# Plot horizon (angle and distance)
-azim = np.arange(0.0, 360.0, 360.0 / azim_num)
-hori_elev_real = np.arctan(np.tan(hori_elev) / ter_exa_fac)
-fig = plt.figure(figsize=(16, 5))
-ax0 = plt.axes()
-plt.fill_between(x=azim, y1=0.0, y2=np.rad2deg(hori_elev_real),
-                 color="lightgrey")
-plt.plot(azim, np.rad2deg(hori_elev_real), lw=1.5, color="orangered")
-plt.scatter(azim, np.rad2deg(hori_elev_real), s=70, color="orangered")
-plt.ylim([0.0, 34.0])
-plt.xlabel("Azimuth angle (clockwise from North) [deg]")
-plt.ylabel("Elevation angle [deg]")
-ax0.yaxis.label.set_color("orangered")
-ax1 = ax0.twinx()
-plt.plot(azim, hori_dist / 1000.0, lw=1.5, color="royalblue")
-plt.xlim([0.0, 345.0])
-plt.ylabel("Distance to horizon [km]")
-ax1.yaxis.label.set_color("royalblue")
-fig.savefig(path_out + "Horizon_angle_and_distance.png", dpi=300,
-            bbox_inches="tight")
-plt.close(fig)
+# -----------------------------------------------------------------------------
+# Create images
+# -----------------------------------------------------------------------------
 
-# Plot and save individual images
+# 3D-images with terrain
 colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
 camera_position = \
     [(-25430.556484989338, -53353.24821086885, 46453.6498944145),
@@ -277,16 +256,70 @@ for i in list(data.keys()):
     # pl.camera_position  # return camera position when plot is closed
     pl.close()
 
-# Crop images (optional)
-images = glob.glob(path_out + "fig_???.png")
-images.sort()
-if (len(images) != len(data)):
+# Inset images with horizon angle and distance (optional)
+azim = np.arange(0.0, 360.0, 360.0 / azim_num)
+hori_elev_real = np.arctan(np.tan(hori_elev) / ter_exa_fac)
+num_hori = [data[i]["num_hori"] for i in range(len(data))]
+os.mkdir(path_out + "inset_images/")
+for i in list(data.keys()):
+    fig = plt.figure(figsize=(6.45, 2.5))
+    fig.patch.set_facecolor("black")
+    # -------------------------------------------------------------------------
+    ax0 = plt.axes()
+    ax0.set_facecolor("black")
+    ax0.tick_params(axis="x", colors="lightgrey")
+    ax0.tick_params(axis="y", colors="lightgrey")
+    plt.plot(azim[:num_hori[i]], hori_dist[:num_hori[i]] / 1000.0,
+             lw=1.0, color="royalblue")
+    plt.scatter(azim[:num_hori[i]], hori_dist[:num_hori[i]] / 1000.0,
+                s=40, color="royalblue")
+    plt.axis([0.0, 345.0, 0.0, dist_search / 1000.0])
+    plt.xlabel("Azimuth angle (clockwise from North) [degree]",
+               color="lightgrey")
+    plt.ylabel("Distance to horizon [km]", labelpad=10)
+    ax0.yaxis.label.set_color("royalblue")
+    # -------------------------------------------------------------------------
+    ax1 = ax0.twinx()
+    ax1.set_facecolor("black")
+    ax1.tick_params(axis="y", colors="lightgrey")
+    ax1.spines["bottom"].set_color("lightgrey")
+    ax1.spines["top"].set_color("lightgrey")
+    ax1.spines["right"].set_color("lightgrey")
+    ax1.spines["left"].set_color("lightgrey")
+    plt.plot(azim[:num_hori[i]], np.rad2deg(hori_elev_real)[:num_hori[i]],
+             lw=1.5, color="#EC5800")
+    plt.scatter(azim[:num_hori[i]], np.rad2deg(hori_elev_real)[:num_hori[i]],
+                s=70, color="#EC5800")
+    plt.axis([0.0, 345.0, 0.0, np.rad2deg(hori_elev_real).max() * 1.1])
+    plt.ylabel("Elevation angle [degree]", labelpad=10)
+    ax1.yaxis.label.set_color("#EC5800")
+    # -------------------------------------------------------------------------
+    fig.savefig(path_out + "inset_images/fig_" + "%03d" % (i + 1) + ".png",
+                dpi=160, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.close(fig)
+
+# -----------------------------------------------------------------------------
+# Combine images and create animation (movie or GIF)
+# -----------------------------------------------------------------------------
+
+# Merge (and crop) images
+images = sorted(glob.glob(path_out + "fig_???.png"))
+images_inset = sorted(glob.glob(path_out + "inset_images/fig_???.png"))
+if (len(images) != len(images_inset) != len(data)):
     raise ValueError("Images incomplete")
-os.mkdir(path_out + "cropped/")
-box = (200, 600, 3000, 2500)  # left, upper, right, lower
-for i in images:
+os.mkdir(path_out + "merged/")
+box = (200, 600, 3000, 2500)  # (left, upper, right, lower)
+for i, j in zip(images, images_inset):
     im = Image.open(i)
-    im.crop(box).save(path_out + "cropped/" + i.split("/")[-1], quality=100)
+    im = im.crop(box)
+    im_inset = Image.open(j)
+    # im_inset = im_inset.resize((int(im_inset.width * 0.5),
+    #                             int(im_inset.height * 0.5)),
+    #                            Image.Resampling.LANCZOS)
+    # -> scaling can be avoided by setting appropriate dpi for inset images
+    im.paste(im_inset, (im.width - im_inset.width,
+                        im.height - im_inset.height))
+    im.save(path_out + "merged/" + i.split("/")[-1], quality=100)
 
 # Create movie from images (requires 'FFmpeg')
 # ffmpeg -framerate 3 -i fig_%03d.png -c:v libx264 -r 30 -pix_fmt yuv420p
@@ -295,4 +328,4 @@ for i in images:
 
 # Create GIF from images (requires 'ImageMagick')
 # convert -delay 50 -loop 0 fig_???.png terrain_horizon.gif  # slow
-# mogrify -layers 'optimize' -fuzz 7% terrain_horizon.gif    # compress
+# mogrify -layers 'optimize' -fuzz 7% terrain_horizon.gif    # compress (slow)

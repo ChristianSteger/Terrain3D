@@ -47,7 +47,7 @@ A number of examples scripts are provided in the folder *visualisation*:
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_rot_coords_gebco.py")
 
 - **triangles_terrain_horizon.py**: Visualise MERIT data for a subregion in Switzerland with a triangle mesh on a planar map projection. Illustrate the algorithm to compute terrain horizon (according to [HORAYZON](https://doi.org/10.5194/gmd-15-6817-2022)) in an animation. Combining the invividual images of the animation into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_terrain_horizon.gif?raw=true "Output from triangles_terrain_horizon.py")
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_terrain_horizon_new.gif?raw=true "Output from triangles_terrain_horizon.py")
 
 # Digital elevation model and auxiliary data
 
