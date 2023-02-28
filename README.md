@@ -40,14 +40,21 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **triangles_globe.py**: Visualise entire GEBCO data set on sphere with a triangle mesh. The elevation of quad vertices, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Ice covered quads (land glaciers or ice shelves) are represented as white areas.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Globus.png?raw=true "Output from triangles_globe.py")
 
-- **triangles_grid_boxes.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from triangles_grid_boxes.py")
-
-- **columns_rot_coords_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_rot_coords_gebco.py")
+- **triangles_vertical_grid.py**: Visualise GEBCO or MERIT data for subregion in Switzerland with a triangle mesh. Use a planar map projection and display 'idealised' grid boxes of a GCM/RCM. Optionally display lakes.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_Switzerland_sub_grid_boxes.png?raw=true "Output from triangles_vertical_grid.py")
 
 - **triangles_terrain_horizon.py**: Visualise MERIT data for a subregion in Switzerland with a triangle mesh on a planar map projection. Illustrate the algorithm to compute terrain horizon (according to [HORAYZON](https://doi.org/10.5194/gmd-15-6817-2022)) in an animation. Combining the invividual images of the animation into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_terrain_horizon_new.gif?raw=true "Output from triangles_terrain_horizon.py")
+
+- **columns_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_gebco.py")
+
+- **columns_gebco_resolutions.py**: Placeholder
+
+
+- **columns_cosmo_multi.py**: Placeholder
+
+- **columns_cosmo_vertical_grid.py**: Placeholder
 
 # Digital elevation model and auxiliary data
 
