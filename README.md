@@ -51,10 +51,10 @@ A number of examples scripts are provided in the folder *visualisation*:
 
 - **columns_gebco_resolutions.py**: Placeholder
 
-
 - **columns_cosmo_multi.py**: Placeholder
 
-- **columns_cosmo_vertical_grid.py**: Placeholder
+- **columns_cosmo_vertical_grid.py**: Visualise COSMO topography for a subregion of the Alps with 'grid cell columns'. Vertical height-based hybrid (Gal-Chen) coordinates are additionally represented.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_cosmo_vertical_grid.png?raw=true "Output from columns_cosmo_vertical_grid.py")
 
 # Digital elevation model and auxiliary data
 

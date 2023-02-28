@@ -277,7 +277,6 @@ pl.add_mesh(grid, cmap=colormap, show_edges=False, label="1",
 if np.any(mask_lake):
     pl.add_mesh(grid_lake, color=cm.bukavu(0.3), show_edges=False, label="1",
                 edge_color="black", line_width=5)
-pl.set_background("black")
 if frame in ("monochrome", "ocean"):
     pl.add_mesh(grid_low, color="lightgrey", show_edges=False, label="1",
                 edge_color="black", line_width=5)
