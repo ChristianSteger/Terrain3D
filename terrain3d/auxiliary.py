@@ -8,6 +8,7 @@ import requests
 import numpy as np
 from pyproj import CRS, Transformer
 from matplotlib.colors import ListedColormap
+import matplotlib as mpl
 import terrain3d
 
 # -----------------------------------------------------------------------------
@@ -134,19 +135,19 @@ def gridcoord(x_cent, y_cent):
 
     Parameters
     ----------
-    x_cent: array_like
+    x_cent : array_like
         Array (one-dimensional) with x-coordinates of grid centres [arbitrary]
-    y_cent: array_like
+    y_cent : array_like
         Array (one-dimensional) with y-coordinates of grid centres [arbitrary]
 
     Returns
     -------
-    x_edge: array_like
+    x_edge : array_like
         Array (one-dimensional) with x-coordinates of grid edges [arbitrary]
-    y_edge: array_like
+    y_edge : array_like
         Array (one-dimensional) with y-coordinates of grid edges [arbitrary]"""
 
-    # Check input arguments
+    # Check arguments
     if len(x_cent.shape) != 1 or len(y_cent.shape) != 1:
         raise TypeError("number of dimensions of input arrays is not 1")
     if (np.any(np.diff(np.sign(np.diff(x_cent))) != 0) or
@@ -267,13 +268,85 @@ def cmap_terrain(elevation, cmap_in, num_cols=256):
 
 # -----------------------------------------------------------------------------
 
+def truncate_colormap(cmap_in, trunc_range, num_level=100):
+    """Truncate colormap to specific range.
+
+    Parameters
+    ----------
+    cmap_in : matplotlib.colors.LinearSegmentedColormap or .ListedColormap
+        Input colormap
+    trunc_range : tuple
+        Truancation range [0.0, 1.0] [-]
+    num_level : int
+        Number of levels [-]
+
+    Returns
+    -------
+    cmap_trun : matplotlib.colors.LinearSegmentedColormap
+        Truncated colormap"""
+
+    # Check arguments
+    if (not isinstance(trunc_range, tuple)) or (len(trunc_range) != 2):
+        raise TypeError("Invalid input for 'trunc_range'")
+    if (trunc_range[0] < 0.0) or (trunc_range[1] > 1.0) \
+            or (trunc_range[0] >= trunc_range[1]):
+        raise ValueError("Invalid input for 'trunc_range'")
+
+    # Truncate colormap
+    cmap_trun = mpl.colors.LinearSegmentedColormap.from_list(
+        "trunc({n},{a:.2f},{b:.2f})".format(
+            n=cmap_in.name, a=trunc_range[0], b=trunc_range[1]),
+        cmap_in(np.linspace(trunc_range[0], trunc_range[1], num_level)))
+
+    return cmap_trun
+
+
+# -----------------------------------------------------------------------------
+
+def ncl_colormap(cmap_name):
+    """Download and import NCL-colormap. Overview of available colormaps:
+    https://www.ncl.ucar.edu/Document/Graphics/color_table_gallery.shtml
+
+    Parameters
+    ----------
+    cmap_name : str
+        Name of colormap according to above website
+
+    Returns
+    -------
+    cmap : matplotlib.colors.LinearSegmentedColormap
+        NCL-colormap"""
+
+    # Download colormap
+    path_colormaps = get_path_data() + "ncl_colormaps/"
+    if not os.path.isfile(path_colormaps + cmap_name + ".rgb"):
+        if not os.path.isdir(path_colormaps):
+            os.mkdir(path_colormaps)
+        file_url = "https://www.ncl.ucar.edu/Document/Graphics/ColorTables/" \
+                   + "Files/" + cmap_name + ".rgb"
+        file_path_local = path_colormaps + cmap_name + ".rgb"
+        download_file(file_url, file_path_local)
+
+    # Load colormap
+    rgb = np.loadtxt(path_colormaps + cmap_name + ".rgb",
+                     comments=("#", "ncolors"))
+    if rgb.max() > 1.0:
+        rgb /= 255.0
+    print("Number of colors: " + str(rgb.shape[0]))
+    cmap_ncl = mpl.colors.LinearSegmentedColormap.from_list(
+        cmap_name, rgb, N=rgb.shape[0])
+
+    return cmap_ncl
+
+# -----------------------------------------------------------------------------
+
 def get_path_data():
     """Get path for data. Read from text file in 'Terrain3D' main
         directory if already defined, otherwise define by user.
 
     Returns
     -------
-    path_data: str
+    path_data : str
         Path of data"""
 
     # Create text file with path to data
