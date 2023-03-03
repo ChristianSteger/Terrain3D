@@ -52,7 +52,8 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **columns_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_gebco.py")
 
-- **columns_gebco_resolutions.py**: Placeholder
+- **columns_gebco_resolutions.py**: Visualise GEBCO data set with 'grid cell columns' (-> terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed. Different spatial resolutions are visualised.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_gebco_resolutions.png?raw=true "Output from columns_gebco_resolutions.py")
 
 - **columns_cosmo_vertical_grid.py**: Visualise COSMO topography for a subregion of the Alps with 'grid cell columns'. Vertical height-based hybrid (Gal-Chen) coordinates are additionally represented.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_cosmo_vertical_grid.png?raw=true "Output from columns_cosmo_vertical_grid.py")
