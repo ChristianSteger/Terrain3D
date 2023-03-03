@@ -46,13 +46,13 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **triangles_terrain_horizon.py**: Visualise MERIT data for a subregion in Switzerland with a triangle mesh on a planar map projection. Illustrate the algorithm to compute terrain horizon (according to [HORAYZON](https://doi.org/10.5194/gmd-15-6817-2022)) in an animation. Combining the invividual images of the animation into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_terrain_horizon_new.gif?raw=true "Output from triangles_terrain_horizon.py")
 
+- **triangles_cosmo_multi.py**: Visualise COSMO topography for the Hengduan Mountains (Southeastern Tibetan Plateau) with a triangle mesh. Plot three different topographies (present-day, reduced and envelope).
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_triangles_cosmo_multi.png?raw=true "Output from triangles_cosmo_multi.py")
+
 - **columns_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_gebco.py")
 
 - **columns_gebco_resolutions.py**: Placeholder
-
-- **columns_cosmo_multi.py**: Visualise COSMO topography for the Hengduan Mountains (Southeastern Tibetan Plateau) with 'grid cell columns'. Plot three different topographies (present-day, reduced and envelope).
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_cosmo_multi.png?raw=true "Output from columns_cosmo_multi.py")
 
 - **columns_cosmo_vertical_grid.py**: Visualise COSMO topography for a subregion of the Alps with 'grid cell columns'. Vertical height-based hybrid (Gal-Chen) coordinates are additionally represented.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_cosmo_vertical_grid.png?raw=true "Output from columns_cosmo_vertical_grid.py")
