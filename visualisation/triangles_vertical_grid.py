@@ -16,11 +16,11 @@ import time
 from pyproj import CRS
 from pyproj import Transformer
 from skimage.measure import label
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 import terrain3d
-# import matplotlib.pyplot as plt
-# import matplotlib as mpl
-#
-# mpl.style.use("classic")
+
+mpl.style.use("classic")
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -126,16 +126,16 @@ wire_low = pv.StructuredGrid(x[slic], y[slic], z[slic]).extract_all_edges()
 slic = (slice(-2, None), slice(-2, None), slice(None))  # upper right
 wire_ur = pv.StructuredGrid(x[slic], y[slic], z[slic]).extract_all_edges()
 
+# Colormap
+cmap = terrain3d.auxiliary.terrain_colormap(elevation_ver)
+
 # Plot
-colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
 pl = pv.Plotter(window_size=[1000, 1000])
 col_bar_args = dict(height=0.25, vertical=True, position_x=0.8, position_y=0.1)
-pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, label="1",
-            edge_color="black", line_width=0, cmap=colormap,
+pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap,
             scalar_bar_args=col_bar_args)
 if show_lakes:
-    pl.add_mesh(grid_lake, color=cm.bukavu(0.3), show_edges=False, label="1",
-                edge_color="black", line_width=0)
+    pl.add_mesh(grid_lake, color=cm.bukavu(0.3), show_edges=False)
 pl.add_mesh(wire_ent, show_edges=True, style="wireframe", line_width=5.0,
             color="grey", edge_color="white", opacity=0.2)
 pl.add_mesh(wire_low, show_edges=True, style="wireframe", line_width=5.0,

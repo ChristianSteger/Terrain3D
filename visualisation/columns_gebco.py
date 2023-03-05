@@ -270,16 +270,16 @@ if frame in ("monochrome", "ocean"):
 # Visualise data
 # -----------------------------------------------------------------------------
 
-colormap = terrain3d.auxiliary.cmap_terrain(elevation, cm.bukavu)
+# Colormap
+cmap = terrain3d.auxiliary.terrain_colormap(elevation)
+
+# Plot
 pl = pv.Plotter()
-pl.add_mesh(grid, cmap=colormap, show_edges=False, label="1",
-            edge_color="black", line_width=5, show_scalar_bar=False)
+pl.add_mesh(grid, cmap=cmap, show_edges=False, show_scalar_bar=False)
 if np.any(mask_lake):
-    pl.add_mesh(grid_lake, color=cm.bukavu(0.3), show_edges=False, label="1",
-                edge_color="black", line_width=5)
+    pl.add_mesh(grid_lake, color=cm.bukavu(0.3), show_edges=False)
 if frame in ("monochrome", "ocean"):
-    pl.add_mesh(grid_low, color="lightgrey", show_edges=False, label="1",
-                edge_color="black", line_width=5)
+    pl.add_mesh(grid_low, color="lightgrey", show_edges=False)
 pl.set_background("black")
 # pl.camera_position = \
 #     [(-282445.58202424366, -540119.7098944773, 637043.5660801955),

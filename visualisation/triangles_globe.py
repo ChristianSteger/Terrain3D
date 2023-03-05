@@ -18,11 +18,11 @@ from pyproj import Transformer
 from scipy import interpolate
 import time
 from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 import terrain3d
-# import matplotlib.pyplot as plt
-# import matplotlib as mpl
-#
-# mpl.style.use("classic")
+
+mpl.style.use("classic")
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -159,14 +159,15 @@ grid_ice = pv.UnstructuredGrid(quad_sel.ravel(), cell_types, vertices)
 # Visualise data
 # -----------------------------------------------------------------------------
 
-colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
+# Colormap
+cmap = terrain3d.auxiliary.terrain_colormap(elevation_ver)
+
+# Plot
 pl = pv.Plotter(window_size=[1000, 1000])
 col_bar_args = dict(height=0.25, vertical=True, position_x=0.8, position_y=0.1)
-pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, label="1",
-            edge_color="black", line_width=0, cmap=colormap,
+pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap,
             scalar_bar_args=col_bar_args)
-pl.add_mesh(grid_ice, color="white", show_edges=False, label="1",
-            edge_color="black", line_width=0)
+pl.add_mesh(grid_ice, color="white", show_edges=False)
 pl.set_background("black")
 pl.remove_scalar_bar()
 pl.show()

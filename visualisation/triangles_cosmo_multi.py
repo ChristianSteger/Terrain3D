@@ -111,18 +111,25 @@ for i in topos:
     cell_types[:] = vtk.VTK_QUAD
     grid_water = pv.UnstructuredGrid(quad_sel.ravel(), cell_types, vertices)
 
-    data[i] = {"grid": grid, "grid_water": grid_water}
+    data[i] = {"grid": grid, "grid_water": grid_water,
+               "hsurf_range": (hsurf_ip.min(), hsurf_ip.max())}
 
 # -----------------------------------------------------------------------------
 # Visualise data
 # -----------------------------------------------------------------------------
 
 # Colors
+hsurf_min = np.array([data[i]["hsurf_range"][0] for i in topos]).min()
+hsurf_max = np.array([data[i]["hsurf_range"][1] for i in topos]).max()
+clim = (hsurf_min, hsurf_max)
+clim = (0.0, 7000.0)  # manually overwrite
+cmap = terrain3d.auxiliary.truncate_colormap(cm.bukavu, (0.5, 1.0))
+cmap = terrain3d.auxiliary.discretise_colormap(cmap, num_cols=14)
 color_water = cm.bukavu(0.3)
-colormap = terrain3d.auxiliary.truncate_colormap(cm.bukavu, (0.5, 1.0))
-# colormap = terrain3d.auxiliary.ncl_colormap("OceanLakeLandSnow")
-# color_water = colormap(0.0)
-# colormap = terrain3d.auxiliary.truncate_colormap(colormap, (0.05, 1.0))
+# cmap = terrain3d.auxiliary.ncl_colormap("OceanLakeLandSnow")
+# cmap = terrain3d.auxiliary.truncate_colormap(cmap, (0.05, 1.0))
+# cmap = terrain3d.auxiliary.discretise_colormap(cmap, num_cols=14)
+# color_water = terrain3d.auxiliary.ncl_colormap("OceanLakeLandSnow")(0.0)
 
 # Plot
 names = {"topo": "Present-day", "red_topo": "Reduced", "env_topo": "Envelope"}
@@ -131,18 +138,16 @@ groups = [(0, slice(1, 3)), (1, slice(0, 2)), (1, slice(2, 4))]
 pl = pv.Plotter(window_size=(2600, 1820), shape=(2, 4), groups=groups)
 for ind, i in enumerate(topos):
     pl.subplot(*pos[ind])
-    col_bar_args = dict(height=0.25, vertical=False, position_x=0.8,
-                        position_y=0.1)
+    col_bar_args = dict(height=0.45, vertical=True, position_x=0.9,
+                        position_y=0.4, fmt="%.0f", label_font_size=25,
+                        n_labels=8, title="")
     pl.add_mesh(data[i]["grid"], scalars="Surface elevation", show_edges=False,
-                label="1", edge_color="black", line_width=0, cmap=colormap,
-                scalar_bar_args=col_bar_args)
-    pl.add_mesh(data[i]["grid_water"], color=cm.bukavu(0.3), show_edges=False,
-                label="1", edge_color="black", line_width=0)
-    pl.remove_scalar_bar()
+                cmap=cmap, clim=clim, scalar_bar_args=col_bar_args)
+    pl.add_mesh(data[i]["grid_water"], color=color_water, show_edges=False)
+    # pl.remove_scalar_bar()
     pl.add_text(names[i] + " topography", font_size=20, color="white",
                 position=(150.0, 800.0))
     pl.set_background("black")
-    # pl.add_text(names[i], font_size=20, color="black")
     # pl.set_background("white")
 pl.link_views()
 pl.camera_position = \

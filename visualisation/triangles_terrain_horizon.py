@@ -34,7 +34,7 @@ domain = ( 9.231788 - 0.2, 9.231788 + 0.2,
 dist_search = 10000.0  # search distance for terrain horizon [m]
 hori_acc = np.deg2rad(1.0)  # accuracy of horizon computation [degree]
 azim_num = 24  # number of azimuth sectors [-]
-path_out = "/Users/csteger/Desktop/PyVista_terrain_horizon/"
+path_out = os.getenv("HOME") + "/Desktop/PyVista_terrain_horizon/"
 # output directory
 
 
@@ -224,8 +224,10 @@ print("Number of steps: " + str(len(data)))
 # Create images
 # -----------------------------------------------------------------------------
 
+# Colormap
+cmap = terrain3d.auxiliary.terrain_colormap(elevation_ver)
+
 # 3D-images with terrain
-colormap = terrain3d.auxiliary.cmap_terrain(elevation_ver, cm.bukavu)
 camera_position = \
     [(-25430.556484989338, -53353.24821086885, 46453.6498944145),
      (-6.002665031701326e-11, 9.897414867342377, 3815.9759521484375),
@@ -233,8 +235,7 @@ camera_position = \
 for i in list(data.keys()):
     # -------------------------------------------------------------------------
     pl = pv.Plotter(window_size=[3000, 2500])
-    pl.add_mesh(grid, scalars="Surface elevation", show_edges=False,
-                edge_color="black", line_width=0, cmap=colormap)
+    pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap)
     # -------------------------------------------------------------------------
     pl.add_mesh(data[i]["ray"], color="black", line_width=6)
     pt_obs = pv.Sphere(radius=250, center=observer)

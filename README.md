@@ -47,7 +47,7 @@ A number of examples scripts are provided in the folder *visualisation*:
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_terrain_horizon_new.gif?raw=true "Output from triangles_terrain_horizon.py")
 
 - **triangles_cosmo_multi.py**: Visualise COSMO topography for the Hengduan Mountains (Southeastern Tibetan Plateau) with a triangle mesh. Plot three different topographies (present-day, reduced and envelope).
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_triangles_cosmo_multi.png?raw=true "Output from triangles_cosmo_multi.py")
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_triangles_cosmo_multi_new.png?raw=true "Output from triangles_cosmo_multi.py")
 
 - **columns_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D_columns_rot_coords_gebco.png?raw=true "Output from columns_gebco.py")

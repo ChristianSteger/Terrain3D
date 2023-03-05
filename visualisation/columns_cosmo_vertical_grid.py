@@ -150,13 +150,14 @@ for i in sel_thick[2]:
 # Visualise data
 # -----------------------------------------------------------------------------
 
-colormap = terrain3d.auxiliary.cmap_terrain(elevation, cm.bukavu)
+# Colormap
+cmap = terrain3d.auxiliary.terrain_colormap(elevation)
+
+# Plot
 pl = pv.Plotter()
-pl.add_mesh(grid, cmap=colormap, show_edges=False, label="1",
-            edge_color="black", line_width=5, show_scalar_bar=False)
+pl.add_mesh(grid, cmap=cmap, show_edges=False, show_scalar_bar=False)
 if np.any(mask_water):
-    pl.add_mesh(grid_water, color=cm.bukavu(0.3), show_edges=False, label="1",
-                edge_color="black", line_width=5)
+    pl.add_mesh(grid_water, color=cm.bukavu(0.3), show_edges=False)
 pl.add_mesh(wire_ent, show_edges=True, style="wireframe", line_width=5.0,
             color="grey", edge_color="white", opacity=0.2)
 for i in wire_thick:
