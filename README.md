@@ -3,7 +3,7 @@ Three-dimensional visualisation of terrain data from digital elevation models (D
 
 # Package dependencies
 
-The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarray, Numba, Shapely, descartes, Fiona, Rasterio, tqdm, requests, PyVista, Matplotlib, pyproj, cmcrameri, netCDF4, cartopy, xESMF, scikit-image.
+The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarray, Numba, Shapely, descartes, Fiona, Rasterio, tqdm, requests, PyVista, Matplotlib, pyproj, cmcrameri, netCDF4, cartopy, xESMF, scikit-image and Pillow.
 Combining the individual output images of the example script **triangles_terrain_horizon.py** into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
 
 # Installation
@@ -11,7 +11,7 @@ Combining the individual output images of the example script **triangles_terrain
 First, create a Conda environment with all the required Python packages:
 
 ```bash
-conda create -n terrain3d -c conda-forge numpy scipy matplotlib netcdf4 shapely xarray pyproj cartopy rasterio descartes fiona scikit-image numba xesmf cmcrameri tqdm requests pyvista
+conda create -n terrain3d -c conda-forge numpy scipy matplotlib netcdf4 shapely xarray pyproj cartopy rasterio descartes fiona scikit-image numba xesmf cmcrameri tqdm requests pyvista pillow
 ```
 
 and **activate this environment**. The Terrain3D package can then be installed with:
