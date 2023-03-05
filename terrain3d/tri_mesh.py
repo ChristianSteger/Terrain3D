@@ -11,7 +11,7 @@ import numba as nb
 
 @nb.jit(nb.int64[:, :, :](nb.int64, nb.int64), nopython=True, parallel=True)
 def get_quad_indices(num_ver_x, num_ver_y):
-    """Compute quad indices for two-dimensional data.
+    """Compute quad indices for triangle mesh.
 
     Parameters
     ----------

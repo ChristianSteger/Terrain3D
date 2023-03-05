@@ -192,7 +192,7 @@ x, y, z = transformer.transform(*np.meshgrid(lon_ver, lat_ver),
 # Create indices array for quad vertices
 num_quad_x = len(lon_ver) - 1
 num_quad_y = len(lat_ver) - 1
-quad_indices = terrain3d.triangles.get_quad_indices(len(lon_ver), len(lat_ver))
+quad_indices = terrain3d.tri_mesh.get_quad_indices(len(lon_ver), len(lat_ver))
 
 # Reshape arrays
 vertices = np.hstack((x.ravel()[:, np.newaxis],

@@ -1,4 +1,4 @@
-# Description: Visualise GEBCO data set with 'grid cell columns' (-> terrain
+# Description: Visualise GEBCO data set with rectangular columns (-> terrain
 #              representation in climate models). The elevation of grid cells,
 #              which are below sea level and are land according to the GSHHG
 #              data base, are set to 0.0 m. Lakes can optionally be displayed.
@@ -201,26 +201,25 @@ for i in list(rot_coords.keys()):
     # (-> 'cell_data', which is used for colouring, uses unmodified 'elevation')
 
     # Compute vertices for grid cell columns
-    vertices = terrain3d.columns.get_vertices(x_ver, y_ver, elevation_pad_0)
+    vertices = terrain3d.rect_columns.get_vertices(x_ver, y_ver,
+                                                   elevation_pad_0)
     shp_ver = vertices.shape
     vertices_rshp = vertices.reshape((y_ver.size * x_ver.size * 4), 3)
 
     # Compute quads for grid cell columns
     quads, cell_data, column_index \
-        = terrain3d.columns.get_quads(elevation, elevation_pad_0, shp_ver)
+        = terrain3d.rect_columns.get_quads(elevation, elevation_pad_0, shp_ver)
 
     # Compute vertices/quads for frame (optional)
     if frame == "monochrome":
-        vertices_rshp, quads_low \
-            = terrain3d.columns.add_frame_monochrome(depth_limit_scal,
-                                                     elevation,
-                                                     x_ver, y_ver,
-                                                     vertices_rshp, shp_ver)
+        vertices_rshp, quads_low = terrain3d.rect_columns \
+            .add_frame_monochrome(depth_limit_scal, elevation, x_ver, y_ver,
+                                  vertices_rshp, shp_ver)
     elif frame == "ocean":
         vertices_rshp, quads_ocean, cell_data_ocean, quads_low \
-            = terrain3d.columns.add_frame_ocean(depth_limit_scal, elevation,
-                                                x_ver, y_ver, vertices_rshp,
-                                                shp_ver)
+            = terrain3d.rect_columns \
+            .add_frame_ocean(depth_limit_scal, elevation, x_ver, y_ver,
+                             vertices_rshp, shp_ver)
         quads = np.vstack((quads, quads_ocean))
         cell_data = np.append(cell_data, cell_data_ocean)
 

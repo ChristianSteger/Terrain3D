@@ -111,7 +111,7 @@ print("Convert geographic to cartesian coordinates "
 t_beg = time.time()
 num_quad_lon = num_ver_lon - 1
 num_quad_lat = num_ver_lat - 1
-quad_indices = terrain3d.triangles.get_quad_indices(num_ver_lon, num_ver_lat)
+quad_indices = terrain3d.tri_mesh.get_quad_indices(num_ver_lon, num_ver_lat)
 print("Create quad vertices array (%.1f" % (time.time() - t_beg) + " s)")
 
 # Create mask for glaciated area (for quads)

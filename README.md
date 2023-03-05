@@ -50,13 +50,13 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **tri_mesh_cosmo_multi.py**: Visualise COSMO topography for the Hengduan Mountains (Southeastern Tibetan Plateau) with a triangle mesh. Plot three different topographies (present-day, reduced and envelope).
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Tri_mesh_cosmo_multi.png?raw=true "Output from tri_mesh_cosmo_multi.py")
 
-- **rect_columns_gebco.py**: Visualise GEBCO data set with 'grid cell columns' (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
+- **rect_columns_gebco.py**: Visualise GEBCO data set with rectangular columns (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco.png?raw=true "Output from rect_columns_gebco.py")
 
-- **rect_columns_gebco_resolutions.py**: Visualise GEBCO data set with 'grid cell columns' (-> terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed. Different spatial resolutions are visualised.
+- **rect_columns_gebco_resolutions.py**: Visualise GEBCO data set with rectangular columns (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed. Different spatial resolutions are visualised.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco_resolutions.png?raw=true "Output from rect_columns_gebco_resolutions.py")
 
-- **rect_columns_cosmo_vertical_grid.py**: Visualise COSMO topography for a subregion of the Alps with 'grid cell columns'. Vertical height-based hybrid (Gal-Chen) coordinates are additionally represented.
+- **rect_columns_cosmo_vertical_grid.py**: Visualise COSMO topography for a subregion of the Alps with rectangular columns. Vertical height-based hybrid (Gal-Chen) coordinates are additionally represented.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_cosmo_vertical_grid.png?raw=true "Output from rect_columns_cosmo_vertical_grid.py")
 
 # Digital elevation model and auxiliary data

@@ -11,7 +11,7 @@ import numba as nb
 @nb.jit(nb.float64[:, :, :, :](nb.float64[:], nb.float64[:], nb.float32[:, :]),
         nopython=True)
 def get_vertices(x_ver, y_ver, elevation_pad_0):
-    """Compute vertices of grid cell columns.
+    """Compute vertices of rectangular columns.
 
     Parameters
     ----------
@@ -85,7 +85,7 @@ def map_indices(ind_0, ind_1, ind_2, shp_ver):
          nb.types.containers.UniTuple(nb.types.int64, 4)),
         nopython=True)
 def get_quads(elevation, elevation_pad_0, shp_ver):
-    """Compute quads of grid cell columns.
+    """Compute quads of rectangular columns.
 
     Parameters
     ----------

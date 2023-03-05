@@ -86,7 +86,7 @@ for i in topos:
     # Create indices array for quad vertices
     num_quad_x = len(x_ver) - 1
     num_quad_y = len(y_ver) - 1
-    quad_indices = terrain3d.triangles.get_quad_indices(len(x_ver), len(y_ver))
+    quad_indices = terrain3d.tri_mesh.get_quad_indices(len(x_ver), len(y_ver))
 
     # Reshape arrays
     vertices = np.hstack((x.ravel()[:, np.newaxis],

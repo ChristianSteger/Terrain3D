@@ -1,5 +1,5 @@
 # Description: Visualise COSMO topography for a subregion of the Alps with
-#              'grid cell columns'. Vertical height-based hybrid (Gal-Chen)
+#              rectangular columns. Vertical height-based hybrid (Gal-Chen)
 #              coordinates are additionally represented.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
@@ -85,13 +85,13 @@ elevation_pad_0 = elevation_pad_0.clip(min=0.0)
 # (-> 'cell_data', which is used for colouring, uses unmodified 'elevation')
 
 # Compute vertices for grid cell columns
-vertices = terrain3d.columns.get_vertices(x_ver, y_ver, elevation_pad_0)
+vertices = terrain3d.rect_columns.get_vertices(x_ver, y_ver, elevation_pad_0)
 shp_ver = vertices.shape
 vertices_rshp = vertices.reshape((y_ver.size * x_ver.size * 4), 3)
 
 # Compute quads for grid cell columns
 quads, cell_data, column_index \
-    = terrain3d.columns.get_quads(elevation, elevation_pad_0, shp_ver)
+    = terrain3d.rect_columns.get_quads(elevation, elevation_pad_0, shp_ver)
 
 # Mask lake/ocean grid cells (-> represent as blue area)
 mask_water = (fr_land < 0.5)
