@@ -7,13 +7,9 @@
 # MIT License
 
 # Load modules
-import os
 import numpy as np
 import vtk
 import pyvista as pv
-path_esmf = "/Users/csteger/miniconda3/envs/pyvista/lib/esmf.mk" # MacBook
-# path_esmf = "/Users/csteger/opt/miniconda3/envs/pyvista/lib/esmf.mk" # Deskt.
-os.environ["ESMFMKFILE"] = path_esmf
 import xesmf as xe
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature

@@ -9,8 +9,145 @@ import numpy as np
 from pyproj import CRS, Transformer
 from matplotlib.colors import ListedColormap
 import matplotlib as mpl
+from cmcrameri import cm
 import terrain3d
 
+
+# -----------------------------------------------------------------------------
+# Colormaps
+# -----------------------------------------------------------------------------
+
+def terrain_colormap(elevation, num_cols=256):
+    """Adapt terrain colormap to make it suitable for elevation limits that
+    are not symmetric with respect to 0.0 m. Use colormap 'bukavu' from
+    'cmcrameri'.
+
+    Parameters
+    ----------
+    elevation : ndarray of float/double
+        Array with elevation of DEM [arbitrary]
+    num_cols : int
+        Number of colours
+
+    Returns
+    -------
+    cmap_out : matplotlib.colors.ListedColormap
+        Colormap adapted for use in PyVista"""
+
+    mapping = np.linspace(elevation.min(), elevation.max(), num_cols)
+    cols = np.empty((num_cols, 4), dtype=np.float32)
+    for i in range(num_cols):
+        if mapping[i] < 0.0:
+            val = (1.0 - mapping[i] / mapping[0]) / 2.0
+            cols[i, :] = cm.bukavu(val)
+        else:
+            val = (mapping[i] / mapping[-1]) / 2.0 + 0.5
+            cols[i, :] = cm.bukavu(val)
+    cmap_out = ListedColormap(cols)
+
+    return cmap_out
+
+
+# -----------------------------------------------------------------------------
+
+def discretise_colormap(cmap_in, num_cols=20):
+    """Discretise colormap according to number of colors.
+
+    Parameters
+    ----------
+    cmap_in : matplotlib.colors.LinearSegmentedColormap or .ListedColormap
+        Input colormap
+    num_cols : int
+        Number of colours
+
+    Returns
+    -------
+    cmap_out : matplotlib.colors.ListedColormap
+        Output colormap"""
+
+    cols = np.empty((num_cols, 4), dtype=np.float32)
+    for i in range(num_cols):
+        cols[i, :] = cmap_in(float(i) / float(num_cols - 1))
+    cmap_out = ListedColormap(cols)
+
+    return cmap_out
+
+
+# -----------------------------------------------------------------------------
+
+def truncate_colormap(cmap_in, trunc_range, num_cols=100):
+    """Truncate colormap to specific range.
+
+    Parameters
+    ----------
+    cmap_in : matplotlib.colors.LinearSegmentedColormap or .ListedColormap
+        Input colormap
+    trunc_range : tuple
+        Truancation range [0.0, 1.0] [-]
+    num_cols : int
+        Number of colours
+
+    Returns
+    -------
+    cmap_trun : matplotlib.colors.LinearSegmentedColormap
+        Truncated colormap"""
+
+    # Check arguments
+    if (not isinstance(trunc_range, tuple)) or (len(trunc_range) != 2):
+        raise TypeError("Invalid input for 'trunc_range'")
+    if (trunc_range[0] < 0.0) or (trunc_range[1] > 1.0) \
+            or (trunc_range[0] >= trunc_range[1]):
+        raise ValueError("Invalid input for 'trunc_range'")
+
+    # Truncate colormap
+    cmap_trun = mpl.colors.LinearSegmentedColormap.from_list(
+        "trunc({n},{a:.2f},{b:.2f})".format(
+            n=cmap_in.name, a=trunc_range[0], b=trunc_range[1]),
+        cmap_in(np.linspace(trunc_range[0], trunc_range[1], num_cols)))
+
+    return cmap_trun
+
+
+# -----------------------------------------------------------------------------
+
+def ncl_colormap(cmap_name):
+    """Download and import NCL-colormap. Overview of available colormaps:
+    https://www.ncl.ucar.edu/Document/Graphics/color_table_gallery.shtml
+
+    Parameters
+    ----------
+    cmap_name : str
+        Name of colormap according to above website
+
+    Returns
+    -------
+    cmap : matplotlib.colors.LinearSegmentedColormap
+        NCL-colormap"""
+
+    # Download colormap
+    path_colormaps = get_path_data() + "ncl_colormaps/"
+    if not os.path.isfile(path_colormaps + cmap_name + ".rgb"):
+        if not os.path.isdir(path_colormaps):
+            os.mkdir(path_colormaps)
+        file_url = "https://www.ncl.ucar.edu/Document/Graphics/ColorTables/" \
+                   + "Files/" + cmap_name + ".rgb"
+        file_path_local = path_colormaps + cmap_name + ".rgb"
+        download_file(file_url, file_path_local)
+
+    # Load colormap
+    rgb = np.loadtxt(path_colormaps + cmap_name + ".rgb",
+                     comments=("#", "ncolors"))
+    if rgb.max() > 1.0:
+        rgb /= 255.0
+    print("Number of colors: " + str(rgb.shape[0]))
+    cmap_ncl = mpl.colors.LinearSegmentedColormap.from_list(
+        cmap_name, rgb, N=rgb.shape[0])
+
+    return cmap_ncl
+
+
+# -----------------------------------------------------------------------------
+# Miscellaneous
 # -----------------------------------------------------------------------------
 
 def download_file(file_url, file_path_local, auth=None):
@@ -231,112 +368,6 @@ def domain_extend_geo_coord(x_cent, y_cent, crs_proj, bound_res,
 
     return domain
 
-
-# -----------------------------------------------------------------------------
-
-def cmap_terrain(elevation, cmap_in, num_cols=256):
-    """Adapt terrain colormap to make it suitable for PyVista.
-
-    Parameters
-    ----------
-    elevation : ndarray of float/double
-        Array with elevation of DEM [arbitrary]
-    cmap_in : matplotlib.colors.ListedColormap
-        Colormap suitable for terrain representation (lower half ocean and
-        upper half land terrain; like 'cmcrameri.cm.bukavu')
-    num_cols : int
-        Number of colours
-
-    Returns
-    -------
-    cmap_out : matplotlib.colors.ListedColormap
-        Colormap adapted for use in PyVista"""
-
-    mapping = np.linspace(elevation.min(), elevation.max(), num_cols)
-    cols = np.empty((num_cols, 4), dtype=np.float32)
-    for i in range(num_cols):
-        if mapping[i] < 0.0:
-            val = (1.0 - mapping[i] / mapping[0]) / 2.0
-            cols[i, :] = cmap_in(val)
-        else:
-            val = (mapping[i] / mapping[-1]) / 2.0 + 0.5
-            cols[i, :] = cmap_in(val)
-    cmap_out = ListedColormap(cols)
-
-    return cmap_out
-
-
-# -----------------------------------------------------------------------------
-
-def truncate_colormap(cmap_in, trunc_range, num_level=100):
-    """Truncate colormap to specific range.
-
-    Parameters
-    ----------
-    cmap_in : matplotlib.colors.LinearSegmentedColormap or .ListedColormap
-        Input colormap
-    trunc_range : tuple
-        Truancation range [0.0, 1.0] [-]
-    num_level : int
-        Number of levels [-]
-
-    Returns
-    -------
-    cmap_trun : matplotlib.colors.LinearSegmentedColormap
-        Truncated colormap"""
-
-    # Check arguments
-    if (not isinstance(trunc_range, tuple)) or (len(trunc_range) != 2):
-        raise TypeError("Invalid input for 'trunc_range'")
-    if (trunc_range[0] < 0.0) or (trunc_range[1] > 1.0) \
-            or (trunc_range[0] >= trunc_range[1]):
-        raise ValueError("Invalid input for 'trunc_range'")
-
-    # Truncate colormap
-    cmap_trun = mpl.colors.LinearSegmentedColormap.from_list(
-        "trunc({n},{a:.2f},{b:.2f})".format(
-            n=cmap_in.name, a=trunc_range[0], b=trunc_range[1]),
-        cmap_in(np.linspace(trunc_range[0], trunc_range[1], num_level)))
-
-    return cmap_trun
-
-
-# -----------------------------------------------------------------------------
-
-def ncl_colormap(cmap_name):
-    """Download and import NCL-colormap. Overview of available colormaps:
-    https://www.ncl.ucar.edu/Document/Graphics/color_table_gallery.shtml
-
-    Parameters
-    ----------
-    cmap_name : str
-        Name of colormap according to above website
-
-    Returns
-    -------
-    cmap : matplotlib.colors.LinearSegmentedColormap
-        NCL-colormap"""
-
-    # Download colormap
-    path_colormaps = get_path_data() + "ncl_colormaps/"
-    if not os.path.isfile(path_colormaps + cmap_name + ".rgb"):
-        if not os.path.isdir(path_colormaps):
-            os.mkdir(path_colormaps)
-        file_url = "https://www.ncl.ucar.edu/Document/Graphics/ColorTables/" \
-                   + "Files/" + cmap_name + ".rgb"
-        file_path_local = path_colormaps + cmap_name + ".rgb"
-        download_file(file_url, file_path_local)
-
-    # Load colormap
-    rgb = np.loadtxt(path_colormaps + cmap_name + ".rgb",
-                     comments=("#", "ncolors"))
-    if rgb.max() > 1.0:
-        rgb /= 255.0
-    print("Number of colors: " + str(rgb.shape[0]))
-    cmap_ncl = mpl.colors.LinearSegmentedColormap.from_list(
-        cmap_name, rgb, N=rgb.shape[0])
-
-    return cmap_ncl
 
 # -----------------------------------------------------------------------------
 

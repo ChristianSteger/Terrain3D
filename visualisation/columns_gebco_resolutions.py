@@ -8,13 +8,9 @@
 # MIT License
 
 # Load modules
-import os
 import numpy as np
 import vtk
 import pyvista as pv
-path_esmf = "/Users/csteger/miniconda3/envs/pyvista/lib/esmf.mk" # MacBook
-# path_esmf = "/Users/csteger/opt/miniconda3/envs/pyvista/lib/esmf.mk" # Deskt.
-os.environ["ESMFMKFILE"] = path_esmf
 import xesmf as xe
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -40,7 +36,7 @@ mpl.style.use("classic")
 # d_spac = {"50km": 0.44, "12km": 0.11, "2km": 0.02}  # grid spacing [degree]
 # rlon_rang = (-3.1, 0.86)  # ~ range in rotated longitude direction [degree]
 # rlat_rang = (-1.5, 1.14) # ~ range in rotated latitude direction [degree]
-# terrain_exag_fac = 5.0
+# terrain_exag_fac = 6.0
 # depth_limit = -1500.0
 # gebco_agg_num = {"50km": 50, "12km": 12, "2km": 2}
 # frame = None  # None, "monochrome", "ocean"
@@ -50,6 +46,7 @@ mpl.style.use("classic")
 #     [(-104360.44462933527, -275666.88535599434, 660212.3759366738),
 #      (-124538.25919884289, -20015.07737124261, 10167.4248046875),
 #      (0.02877473710164539, 0.9305350169623949, 0.3650706735846183)]
+# position_txt = (150.0, 850.0) # position of sub-plot labels
 
 # Middle/South Europe (~200 km, ~50 km, ~12 km)
 pole_lat = 43.0
@@ -63,11 +60,12 @@ depth_limit = -5200.0
 gebco_agg_num = {"200km": 100, "50km": 50, "12km": 12}
 frame = "ocean"
 show_lakes = False
-window_size = (3000, 2000)
+window_size = (3200, 2000)
 camera_position = \
-    [(-195672.7609013163, -3005815.302114207, 4851472.805713926),
-     (-124538.25919884289, -20015.07737124261, 10167.4248046875),
-     (-0.016677811616645104, 0.8511361479720833, 0.5246800055414)]
+    [(-3282418.0538254846, -4079279.745528131, 2942871.552600236),
+     (0.0, 0.0, 0.0),
+     (0.21481878265999022, 0.4517997331693586, 0.8658694426555174)]
+position_txt = (150.0, 680.0)
 
 # General settings
 plot_sel_dom = True  # plot domain selection
@@ -99,27 +97,27 @@ for i in list(d_spac.keys()):
     rot_coords[i] = {"rlon": rlon, "rlat": rlat,
                      "rlon_edge": rlon_edge, "rlat_edge": rlat_edge}
 
-# Check extent of select domain
-line_prop = ({"color": "grey", "lw": 6.0, "ls": "-"},
-             {"color": "blue", "lw": 3.0, "ls": "--"},
-             {"color": "red", "lw": 1.0, "ls": "-"})
-if plot_sel_dom:
-    plt.figure()
-    ax = plt.axes(projection=crs_rot)
-    ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.BORDERS)
-    for ind, i in enumerate(list(rot_coords.keys())):
-        rlon_edge = rot_coords[i]["rlon_edge"]
-        rlat_edge = rot_coords[i]["rlat_edge"]
-        poly = [(rlon_edge[0], rlat_edge[0]), (rlon_edge[-1], rlat_edge[0]),
-                (rlon_edge[-1], rlat_edge[-1]), (rlon_edge[0], rlat_edge[-1])]
-        polygon = plt.Polygon(poly, facecolor="none",
-                              edgecolor=line_prop[ind]["color"],
-                              linewidth=line_prop[ind]["lw"],
-                              linestyle=line_prop[ind]["ls"],)
-        ax.add_patch(polygon)
-    ax.set_extent([rlon_edge[0] - 0.5, rlon_edge[-1] + 0.5,
-                   rlat_edge[0] - 0.5, rlat_edge[-1] + 0.5])
+# # Plot extent of select domain
+# line_prop = ({"color": "grey", "lw": 6.0, "ls": "-"},
+#              {"color": "blue", "lw": 3.0, "ls": "--"},
+#              {"color": "red", "lw": 1.0, "ls": "-"})
+# if plot_sel_dom:
+#     plt.figure()
+#     ax = plt.axes(projection=crs_rot)
+#     ax.add_feature(cfeature.COASTLINE)
+#     ax.add_feature(cfeature.BORDERS)
+#     for ind, i in enumerate(list(rot_coords.keys())):
+#         rlon_edge = rot_coords[i]["rlon_edge"]
+#         rlat_edge = rot_coords[i]["rlat_edge"]
+#         poly = [(rlon_edge[0], rlat_edge[0]), (rlon_edge[-1], rlat_edge[0]),
+#                 (rlon_edge[-1], rlat_edge[-1]), (rlon_edge[0], rlat_edge[-1])]
+#         polygon = plt.Polygon(poly, facecolor="none",
+#                               edgecolor=line_prop[ind]["color"],
+#                               linewidth=line_prop[ind]["lw"],
+#                               linestyle=line_prop[ind]["ls"],)
+#         ax.add_patch(polygon)
+#     ax.set_extent([rlon_edge[0] - 0.5, rlon_edge[-1] + 0.5,
+#                    rlat_edge[0] - 0.5, rlat_edge[-1] + 0.5])
 
 # Compute visualisation data for different topographies
 data = {}
@@ -193,7 +191,7 @@ for i in list(rot_coords.keys()):
     x_ver = rlon_edge * deg2m
     y_ver = rlat_edge * deg2m
     elevation = elevation_in * terrain_exag_fac
-    depth_limit *= terrain_exag_fac
+    depth_limit_scal = depth_limit * terrain_exag_fac
 
     # Pad elevation array with 0.0 at all sides
     elevation_pad_0 = np.pad(elevation, [(1, 1), (1, 1)], mode="constant",
@@ -214,13 +212,15 @@ for i in list(rot_coords.keys()):
     # Compute vertices/quads for frame (optional)
     if frame == "monochrome":
         vertices_rshp, quads_low \
-            = terrain3d.columns.add_frame_monochrome(depth_limit, elevation,
+            = terrain3d.columns.add_frame_monochrome(depth_limit_scal,
+                                                     elevation,
                                                      x_ver, y_ver,
                                                      vertices_rshp, shp_ver)
     elif frame == "ocean":
         vertices_rshp, quads_ocean, cell_data_ocean, quads_low \
-            = terrain3d.columns.add_frame_ocean(depth_limit, elevation, x_ver,
-                                                y_ver, vertices_rshp, shp_ver)
+            = terrain3d.columns.add_frame_ocean(depth_limit_scal, elevation,
+                                                x_ver, y_ver, vertices_rshp,
+                                                shp_ver)
         quads = np.vstack((quads, quads_ocean))
         cell_data = np.append(cell_data, cell_data_ocean)
 
@@ -248,7 +248,8 @@ for i in list(rot_coords.keys()):
     grid_lake = pv.UnstructuredGrid(quads_sel.ravel(), cell_types,
                                     vertices_rshp)
 
-    data[i] = {"grid": grid, "grid_lake": grid_lake, "mask_lake": mask_lake}
+    data[i] = {"grid": grid, "grid_lake": grid_lake, "mask_lake": mask_lake,
+               "cell_data_range": (cell_data_sel.min(), cell_data_sel.max())}
 
     # Frame quads (optional)
     if frame in ("monochrome", "ocean"):
@@ -264,26 +265,28 @@ for i in list(rot_coords.keys()):
 # -----------------------------------------------------------------------------
 
 # Colors
-colormap = terrain3d.auxiliary.cmap_terrain(elevation, cm.bukavu)
+cell_data_min = np.array([data[i]["cell_data_range"][0]
+                          for i in rot_coords.keys()]).min()
+cell_data_max = np.array([data[i]["cell_data_range"][1]
+                          for i in rot_coords.keys()]).max()
+clim = (cell_data_min, cell_data_max)
+cmap = terrain3d.auxiliary.terrain_colormap(np.array(clim))
+color_lake = cm.bukavu(0.3)
 
 # Plot
 pos = ((0, 1), (1, 1), (1, 3))
 groups = [(0, slice(1, 3)), (1, slice(0, 2)), (1, slice(2, 4))]
-pl = pv.Plotter(window_size=(3000, 2000), shape=(2, 4), groups=groups)
+pl = pv.Plotter(window_size=window_size, shape=(2, 4), groups=groups)
 for ind, i in enumerate(list(rot_coords.keys())):
     pl.subplot(*pos[ind])
-    pl.add_mesh(data[i]["grid"], cmap=colormap, show_edges=False, label="1",
-                edge_color="black", line_width=5, show_scalar_bar=False)
+    pl.add_mesh(data[i]["grid"], cmap=cmap, clim=clim, show_edges=False,
+                show_scalar_bar=False)
     if np.any(data[i]["mask_lake"]):
-        pl.add_mesh(data[i]["grid_lake"], color=cm.bukavu(0.3),
-                    show_edges=False, label="1", edge_color="black",
-                    line_width=5)
+        pl.add_mesh(data[i]["grid_lake"], color=color_lake, show_edges=False)
     if frame in ("monochrome", "ocean"):
-        pl.add_mesh(data[i]["grid_low"], color="lightgrey", show_edges=False,
-                    label="1", edge_color="black", line_width=5)
+        pl.add_mesh(data[i]["grid_low"], color="lightgrey", show_edges=False)
     txt = "~" + i[:-2] + " " + i[-2:]
-    pl.add_text(txt, font_size=25, color="white",
-                position=(190.0, 880.0))
+    pl.add_text(txt, font_size=25, color="white", position=position_txt)
     pl.set_background("black")
 pl.link_views()
 pl.camera_position = camera_position
