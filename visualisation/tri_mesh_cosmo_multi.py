@@ -21,16 +21,29 @@ import terrain3d
 mpl.style.use("classic")
 
 # -----------------------------------------------------------------------------
+# Settings
+# -----------------------------------------------------------------------------
+
+# Plot background color
+topos = ["topo", "red_topo", "env_topo"]  # different topographies
+terrain_exag_fac = 12.0  # terrain exaggeration factor [-]
+background_color = "black"  # "black", "white"
+
+# -----------------------------------------------------------------------------
 # Prepare data
 # -----------------------------------------------------------------------------
+
+# Check background color and set linked variables
+if background_color not in ("black", "white"):
+    raise ValueError("Invalid background color for plot")
+if background_color == "black":
+    txt_color = "white"
+else:
+    txt_color = "black"
 
 # Path for example data
 path_examp = os.path.join(os.path.split(
     os.path.dirname(terrain3d.__file__))[0], "example_data/")
-
-# Settings
-terrain_exag_fac = 12.0  # terrain exaggeration factor [-]
-topos = ["topo", "red_topo", "env_topo"]
 
 # Load topographies
 hsurf = {}
@@ -76,10 +89,8 @@ for i in topos:
     hsurf_ip = f_ip(y_ip, x_ip)
 
     # Compute cartesian vertices coordinates and terrain exaggeration
-    rad_earth = 6370997.0  # earth radius [m]
-    deg2m = (2.0 * np.pi * rad_earth) / 360.0  # [m deg-1]
-    x_ver = (rlon_edge * deg2m).astype(np.float64)
-    y_ver = (rlat_edge * deg2m).astype(np.float64)
+    x_ver = (rlon_edge * terrain3d.constants.deg2m).astype(np.float64)
+    y_ver = (rlat_edge * terrain3d.constants.deg2m).astype(np.float64)
     x, y = np.meshgrid(x_ver, y_ver)
     z = hsurf_ip * terrain_exag_fac
 
@@ -122,7 +133,7 @@ for i in topos:
 hsurf_min = np.array([data[i]["hsurf_range"][0] for i in topos]).min()
 hsurf_max = np.array([data[i]["hsurf_range"][1] for i in topos]).max()
 clim = (hsurf_min, hsurf_max)
-clim = (0.0, 7000.0)  # manually overwrite
+clim = (0.0, 7000.0)  # overwrite manually
 cmap = terrain3d.auxiliary.truncate_colormap(cm.bukavu, (0.5, 1.0))
 cmap = terrain3d.auxiliary.discretise_colormap(cmap, num_cols=14)
 color_water = cm.bukavu(0.3)
@@ -132,23 +143,29 @@ color_water = cm.bukavu(0.3)
 # color_water = terrain3d.auxiliary.ncl_colormap("OceanLakeLandSnow")(0.0)
 
 # Plot
-names = {"topo": "Present-day", "red_topo": "Reduced", "env_topo": "Envelope"}
+names = {"topo": "(a) Present-day topography",
+         "red_topo": "(b) Reduced topography",
+         "env_topo": "(c) Envelope topography"}
+# names = {"topo": "(a) CTRL",
+#          "red_topo": "(b) TRED",
+#          "env_topo": "(c) TENV"}
 pos = ((0, 1), (1, 1), (1, 3))
 groups = [(0, slice(1, 3)), (1, slice(0, 2)), (1, slice(2, 4))]
-pl = pv.Plotter(window_size=(2600, 1820), shape=(2, 4), groups=groups)
+pl = pv.Plotter(window_size=(2600, 1820), shape=(2, 4), groups=groups,
+                border=False)
 for ind, i in enumerate(topos):
     pl.subplot(*pos[ind])
     col_bar_args = dict(height=0.45, vertical=True, position_x=0.9,
-                        position_y=0.4, fmt="%.0f", label_font_size=25,
-                        n_labels=8, title="")
+                        position_y=0.4, fmt="%.0f", label_font_size=35,
+                        n_labels=8, title="", color=txt_color,
+                        italic=False, font_family="arial")
     pl.add_mesh(data[i]["grid"], scalars="Surface elevation", show_edges=False,
                 cmap=cmap, clim=clim, scalar_bar_args=col_bar_args)
     pl.add_mesh(data[i]["grid_water"], color=color_water, show_edges=False)
     # pl.remove_scalar_bar()
-    pl.add_text(names[i] + " topography", font_size=20, color="white",
-                position=(150.0, 800.0))
-    pl.set_background("black")
-    # pl.set_background("white")
+    pl.add_text(names[i], font_size=22, color=txt_color,
+                position=(150.0, 785.0))
+    pl.set_background(background_color)
 pl.link_views()
 pl.camera_position = \
 [(-1518771.653528124, -2352702.0450042486, 3064710.2674981747),

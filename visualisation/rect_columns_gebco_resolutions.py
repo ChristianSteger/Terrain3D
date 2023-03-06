@@ -186,10 +186,8 @@ for i in list(rot_coords.keys()):
                 elevation_in[mask] = elevation_in[mask].mean()
 
     # Compute vertices coordinates and terrain exaggeration
-    rad_earth = 6370997.0  # earth radius [m]
-    deg2m = (2.0 * np.pi * rad_earth) / 360.0  # [m deg-1]
-    x_ver = rlon_edge * deg2m
-    y_ver = rlat_edge * deg2m
+    x_ver = rlon_edge * terrain3d.constants.deg2m
+    y_ver = rlat_edge * terrain3d.constants.deg2m
     elevation = elevation_in * terrain_exag_fac
     depth_limit_scal = depth_limit * terrain_exag_fac
 

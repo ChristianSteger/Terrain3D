@@ -71,10 +71,8 @@ sel_thick = (slice(7, 17), slice(3, 17), [15, 60])
 rlon_edge, rlat_edge = terrain3d.auxiliary.gridcoord(rlon, rlat)
 
 # Compute vertices coordinates and terrain exaggeration
-rad_earth = 6370997.0  # earth radius [m]
-deg2m = (2.0 * np.pi * rad_earth) / 360.0  # [m deg-1]
-x_ver = (rlon_edge * deg2m).astype(np.float64)
-y_ver = (rlat_edge * deg2m).astype(np.float64)
+x_ver = (rlon_edge * terrain3d.constants.deg2m).astype(np.float64)
+y_ver = (rlat_edge * terrain3d.constants.deg2m).astype(np.float64)
 elevation = hsurf * terrain_exag_fac
 
 # Pad elevation array with 0.0 at all sides

@@ -163,7 +163,7 @@ grid_ice = pv.UnstructuredGrid(quad_sel.ravel(), cell_types, vertices)
 cmap = terrain3d.auxiliary.terrain_colormap(elevation_ver)
 
 # Plot
-pl = pv.Plotter(window_size=[1000, 1000])
+pl = pv.Plotter(window_size=[2000, 2000])
 col_bar_args = dict(height=0.25, vertical=True, position_x=0.8, position_y=0.1)
 pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap,
             scalar_bar_args=col_bar_args)
