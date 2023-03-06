@@ -4,7 +4,7 @@ Three-dimensional visualisation of terrain data from digital elevation models (D
 # Package dependencies
 
 The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarray, Numba, Shapely, descartes, Fiona, Rasterio, tqdm, requests, PyVista, Matplotlib, pyproj, cmcrameri, netCDF4, cartopy, xESMF, scikit-image and Pillow.
-Combining the individual output images of the example script **triangles_terrain_horizon.py** into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
+Combining the individual output images of the example scripts **tri_mesh_globe.py** and **triangles_terrain_horizon.py** into a movie or GIF requires [FFmpeg](https://ffmpeg.org) or [ImageMagick](https://imagemagick.org/index.php), respecitvely.
 
 # Installation
 

@@ -20,6 +20,7 @@ import time
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import cartopy.crs as ccrs
 import terrain3d
 
 mpl.style.use("classic")
@@ -32,8 +33,9 @@ mpl.style.use("classic")
 # gebco_agg_num = 24  # aggregation number of input GEBCO data [-]
 res_ter = 0.05  # resolution of visualised terrain [degree]
 gebco_agg_num = 12  # aggregation number of input GEBCO data [-]
-
 ter_exa_fac = 25.0  # terrain exaggeration factor [-]
+path_out = os.getenv("HOME") + "/Desktop/PyVista_globe/"
+# output directory for animation
 
 # -----------------------------------------------------------------------------
 # Prepare data
@@ -171,3 +173,46 @@ pl.add_mesh(grid_ice, color="white", show_edges=False)
 pl.set_background("black")
 pl.remove_scalar_bar()
 pl.show()
+
+# -----------------------------------------------------------------------------
+# Create animation (--> orbiting around globe)
+# -----------------------------------------------------------------------------
+
+# Compute camera orbit
+num_frames = 500  # number of frames (for movie)
+azimuth = np.linspace(0.0, 360.0 - (360 / num_frames), num_frames)
+elevation = np.repeat(0.0, num_frames)
+
+# # Assume that azimuth and elevation are valid for rotated coordinates
+# geo_crs = ccrs.PlateCarree()
+# rot_pole_crs = crs_rot = CRS.from_user_input(
+#     ccrs.RotatedPole(pole_latitude=(90.0 - 47.4),
+#                      pole_longitude=-171.5,
+#                      central_rotated_longitude=0.0)
+# )
+# coord_geo = geo_crs.transform_points(rot_pole_crs, azimuth, elevation)[:, :2]
+# azimuth, elevation = coord_geo[:, 0], coord_geo[:, 1]
+
+# # Check orbit
+# plt.figure(figsize=(12, 5))
+# plt.scatter(azimuth, elevation)
+# plt.xlabel("Geographic longitude [deg]")
+# plt.ylabel("Geographic latitude [deg]")
+
+# Create images
+pl = pv.Plotter(window_size=[1500, 1500], off_screen=True)
+pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap,
+            show_scalar_bar=False)
+pl.add_mesh(grid_ice, color="white", show_edges=False)
+pl.set_background("black")
+pl.camera_position = "yz"
+pl.camera.zoom(1.5)
+for i in range(num_frames):
+    pl.camera.azimuth = azimuth[i]
+    pl.camera.elevation = elevation[i]
+    pl.render()
+    pl.screenshot(path_out + "fig_" + "%03d" % (i + 1) + ".png")
+pl.close()
+
+# Create movie from images (requires 'FFmpeg')
+# ffmpeg -framerate 60 -i fig_%03d.png -c:v libx264 -pix_fmt yuv420p globe.mp4
