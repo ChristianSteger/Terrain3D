@@ -234,7 +234,7 @@ camera_position = \
      (0.12262671008113055, 0.5831885581520082, 0.8030278921776381)]
 for i in list(data.keys()):
     # -------------------------------------------------------------------------
-    pl = pv.Plotter(window_size=[3000, 2500])
+    pl = pv.Plotter(window_size=[3000, 2500], off_screen=True)
     pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap)
     # -------------------------------------------------------------------------
     pl.add_mesh(data[i]["ray"], color="black", line_width=6)
@@ -252,8 +252,8 @@ for i in list(data.keys()):
     pl.remove_scalar_bar()
     pl.set_background("black")
     pl.camera_position = camera_position
-    # pl.show()
-    pl.show(screenshot=path_out + "fig_" + "%03d" % (i + 1) + ".png")
+    # pl.show()  # set 'off_screen=False' in 'pv.Plotter()' to show plot
+    pl.screenshot(path_out + "fig_" + "%03d" % (i + 1) + ".png")
     # pl.camera_position  # return camera position when plot is closed
     pl.close()
 
