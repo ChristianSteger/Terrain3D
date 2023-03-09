@@ -1,7 +1,7 @@
-# Description: Visualise GEBCO data set with rectangular columns (-> terrain
-#              representation in climate models). The elevation of grid cells,
-#              which are below sea level and are land according to the GSHHG
-#              data base, are set to 0.0 m. Lakes can optionally be displayed.
+# Description: Visualise GEBCO data set for Middle/South Europe with
+#              rectangular columns (-> terrain representation in climate
+#              models). The elevation of grid cells, which are below sea level
+#              and are land according to the GSHHG data base, are set to 0.0 m.
 #              Different spatial resolutions are visualised.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
@@ -20,7 +20,6 @@ from cmcrameri import cm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
-from skimage.measure import label
 import terrain3d
 
 mpl.style.use("classic")
@@ -29,47 +28,16 @@ mpl.style.use("classic")
 # Settings
 # -----------------------------------------------------------------------------
 
-# # Switzerland (~50 km, ~12 km, ~2 km)
-# pole_lat = 43.0
-# pole_lon = -170.0
-# cent_rot_lon = 0.0
-# d_spac = {"50km": 0.44, "12km": 0.11, "2km": 0.02}  # grid spacing [degree]
-# rlon_rang = (-3.1, 0.86)  # ~ range in rotated longitude direction [degree]
-# rlat_rang = (-1.5, 1.14) # ~ range in rotated latitude direction [degree]
-# terrain_exag_fac = 6.0
-# depth_limit = -1500.0
-# gebco_agg_num = {"50km": 50, "12km": 12, "2km": 2}
-# frame = None  # None, "monochrome", "ocean"
-# show_lakes = True
-# window_size = (3000, 2000)
-# camera_position = \
-#     [(-104360.44462933527, -275666.88535599434, 660212.3759366738),
-#      (-124538.25919884289, -20015.07737124261, 10167.4248046875),
-#      (0.02877473710164539, 0.9305350169623949, 0.3650706735846183)]
-# position_txt = (150.0, 850.0) # position of sub-plot labels
-
-# Middle/South Europe (~200 km, ~50 km, ~12 km)
 pole_lat = 43.0
 pole_lon = -170.0
 cent_rot_lon = 0.0
-d_spac = {"200km": 1.76, "50km": 0.44, "12km": 0.11}
-rlon_rang = (-15.0, 15.0)
-rlat_rang = (-11.0, 13.0)
+d_spac = {"200km": 1.76, "50km": 0.44, "12km": 0.11}  # grid spacing [degree]
+rlon_rang = (-15.0, 15.0)  # ~ range in rotated longitude direction [degree]
+rlat_rang = (-11.0, 13.0)  # ~ range in rotated latitude direction [degree]
 terrain_exag_fac = 40.0
 depth_limit = -5200.0
 gebco_agg_num = {"200km": 100, "50km": 50, "12km": 12}
-frame = "ocean"
-show_lakes = False
-window_size = (3200, 2000)
-camera_position = \
-    [(-3282418.0538254846, -4079279.745528131, 2942871.552600236),
-     (0.0, 0.0, 0.0),
-     (0.21481878265999022, 0.4517997331693586, 0.8658694426555174)]
-position_txt = (150.0, 680.0)
-
-# General settings
-plot_sel_dom = True  # plot domain selection
-lake_elev_equal = True  # equalise elevation of neighbouring lake grid cells
+frame = "ocean"  # None, "monochrome", "ocean"
 
 # -----------------------------------------------------------------------------
 # Prepare data
@@ -101,23 +69,22 @@ for i in list(d_spac.keys()):
 # line_prop = ({"color": "grey", "lw": 6.0, "ls": "-"},
 #              {"color": "blue", "lw": 3.0, "ls": "--"},
 #              {"color": "red", "lw": 1.0, "ls": "-"})
-# if plot_sel_dom:
-#     plt.figure()
-#     ax = plt.axes(projection=crs_rot)
-#     ax.add_feature(cfeature.COASTLINE)
-#     ax.add_feature(cfeature.BORDERS)
-#     for ind, i in enumerate(list(rot_coords.keys())):
-#         rlon_edge = rot_coords[i]["rlon_edge"]
-#         rlat_edge = rot_coords[i]["rlat_edge"]
-#         poly = [(rlon_edge[0], rlat_edge[0]), (rlon_edge[-1], rlat_edge[0]),
-#                 (rlon_edge[-1], rlat_edge[-1]), (rlon_edge[0], rlat_edge[-1])]
-#         polygon = plt.Polygon(poly, facecolor="none",
-#                               edgecolor=line_prop[ind]["color"],
-#                               linewidth=line_prop[ind]["lw"],
-#                               linestyle=line_prop[ind]["ls"],)
-#         ax.add_patch(polygon)
-#     ax.set_extent([rlon_edge[0] - 0.5, rlon_edge[-1] + 0.5,
-#                    rlat_edge[0] - 0.5, rlat_edge[-1] + 0.5])
+# plt.figure()
+# ax = plt.axes(projection=crs_rot)
+# ax.add_feature(cfeature.COASTLINE)
+# ax.add_feature(cfeature.BORDERS)
+# for ind, i in enumerate(list(rot_coords.keys())):
+#     rlon_edge = rot_coords[i]["rlon_edge"]
+#     rlat_edge = rot_coords[i]["rlat_edge"]
+#     poly = [(rlon_edge[0], rlat_edge[0]), (rlon_edge[-1], rlat_edge[0]),
+#             (rlon_edge[-1], rlat_edge[-1]), (rlon_edge[0], rlat_edge[-1])]
+#     polygon = plt.Polygon(poly, facecolor="none",
+#                           edgecolor=line_prop[ind]["color"],
+#                           linewidth=line_prop[ind]["lw"],
+#                           linestyle=line_prop[ind]["ls"],)
+#     ax.add_patch(polygon)
+# ax.set_extent([rlon_edge[0] - 0.5, rlon_edge[-1] + 0.5,
+#                rlat_edge[0] - 0.5, rlat_edge[-1] + 0.5])
 
 # Compute visualisation data for different topographies
 data = {}
@@ -171,20 +138,6 @@ for i in list(rot_coords.keys()):
     elevation_in[mask] = 0.0
     # -> set elevation of land grid cells to a minimal value of 0.0 m
 
-    # Display lakes (-> as blue areas in visualisation)
-    if not show_lakes:
-        mask_lake = np.zeros(elevation_in.shape, dtype=bool)
-    else:
-        mask_lake = terrain3d.outlines.binary_mask(
-            "shorelines", rlon, rlat, crs_rot, resolution="full", level=2,
-            sub_sample_num=10)
-        if lake_elev_equal:
-            lakes_con, num_labels = label(mask_lake.astype(int), background=0,
-                                          connectivity=2, return_num=True)
-            for j in range(num_labels):
-                mask = (lakes_con == (j + 1))
-                elevation_in[mask] = elevation_in[mask].mean()
-
     # Compute vertices coordinates and terrain exaggeration
     x_ver = rlon_edge * terrain3d.constants.deg2m
     y_ver = rlat_edge * terrain3d.constants.deg2m
@@ -195,8 +148,6 @@ for i in list(rot_coords.keys()):
     elevation_pad_0 = np.pad(elevation, [(1, 1), (1, 1)], mode="constant",
                              constant_values=np.minimum(0.0, elevation.min()))
     elevation_pad_0 = elevation_pad_0.clip(min=0.0)
-    # visualised elevation -> clip values below sea level to 0.0 m
-    # (-> 'cell_data', which is used for colouring, uses unmodified 'elevation')
 
     # Compute vertices for grid cell columns
     vertices = terrain3d.rect_columns.get_vertices(x_ver, y_ver,
@@ -207,6 +158,7 @@ for i in list(rot_coords.keys()):
     # Compute quads for grid cell columns
     quads, cell_data, column_index \
         = terrain3d.rect_columns.get_quads(elevation, elevation_pad_0, shp_ver)
+    # -> 'cell_data', which is used for coloring, uses un-clipped elevation
 
     # Compute vertices/quads for frame (optional)
     if frame == "monochrome":
@@ -221,32 +173,16 @@ for i in list(rot_coords.keys()):
         quads = np.vstack((quads, quads_ocean))
         cell_data = np.append(cell_data, cell_data_ocean)
 
-    # Mask lake grid cells (-> represent as blue area)
-    if np.any(mask_lake) and (elevation[mask_lake].min() < 0.0):
-        raise ValueError("Lakes can only cover land grid cells")
-    ind_ma_0, ind_ma_1 = np.where(mask_lake)
-    ind_ma = np.ravel_multi_index((ind_ma_0, ind_ma_1), elevation.shape)
-    mask_1d = np.zeros(quads.shape[0], dtype=bool)
-    for j in ind_ma:
-        mask_1d[:column_index.size][column_index == j] = True
-
     # Main columns
-    quads_sel = quads[~mask_1d, :]
-    cell_data_sel = cell_data[~mask_1d]
-    cell_types = np.empty(quads_sel.shape[0], dtype=np.uint8)
+    cell_types = np.empty(quads.shape[0], dtype=np.uint8)
     cell_types[:] = vtk.VTK_QUAD
-    grid = pv.UnstructuredGrid(quads_sel.ravel(), cell_types, vertices_rshp)
-    grid.cell_data["Surface elevation [m]"] = cell_data_sel
+    grid = pv.UnstructuredGrid(quads.ravel(), cell_types, vertices_rshp)
+    grid.cell_data["Surface elevation [m]"] \
+        = (cell_data / terrain_exag_fac)
+    # -> save real (un-scaled) elevation in 'cell_data'
 
-    # Lake columns
-    quads_sel = quads[mask_1d, :]
-    cell_types = np.empty(quads_sel.shape[0], dtype=np.uint8)
-    cell_types[:] = vtk.VTK_QUAD
-    grid_lake = pv.UnstructuredGrid(quads_sel.ravel(), cell_types,
-                                    vertices_rshp)
-
-    data[i] = {"grid": grid, "grid_lake": grid_lake, "mask_lake": mask_lake,
-               "cell_data_range": (cell_data_sel.min(), cell_data_sel.max())}
+    data[i] = {"grid": grid,
+               "cell_data_range": (cell_data.min(), cell_data.max())}
 
     # Frame quads (optional)
     if frame in ("monochrome", "ocean"):
@@ -266,26 +202,28 @@ cell_data_min = np.array([data[i]["cell_data_range"][0]
                           for i in rot_coords.keys()]).min()
 cell_data_max = np.array([data[i]["cell_data_range"][1]
                           for i in rot_coords.keys()]).max()
-clim = (cell_data_min, cell_data_max)
+clim = (cell_data_min / terrain_exag_fac, cell_data_max / terrain_exag_fac)
 cmap = terrain3d.auxiliary.terrain_colormap(np.array(clim))
 color_lake = cm.bukavu(0.3)
 
 # Plot
 pos = ((0, 1), (1, 1), (1, 3))
 groups = [(0, slice(1, 3)), (1, slice(0, 2)), (1, slice(2, 4))]
-pl = pv.Plotter(window_size=window_size, shape=(2, 4), groups=groups)
+pl = pv.Plotter(window_size=(3200, 2000), shape=(2, 4), groups=groups,
+                border=False)
 for ind, i in enumerate(list(rot_coords.keys())):
     pl.subplot(*pos[ind])
     pl.add_mesh(data[i]["grid"], cmap=cmap, clim=clim, show_edges=False,
                 show_scalar_bar=False)
-    if np.any(data[i]["mask_lake"]):
-        pl.add_mesh(data[i]["grid_lake"], color=color_lake, show_edges=False)
     if frame in ("monochrome", "ocean"):
         pl.add_mesh(data[i]["grid_low"], color="lightgrey", show_edges=False)
     txt = "~" + i[:-2] + " " + i[-2:]
-    pl.add_text(txt, font_size=25, color="white", position=position_txt)
+    pl.add_text(txt, font_size=25, color="white", position=(150.0, 680.0))
     pl.set_background("black")
 pl.link_views()
-pl.camera_position = camera_position
+pl.camera_position \
+    = [(-3282418.0538254846, -4079279.745528131, 2942871.552600236),
+       (0.0, 0.0, 0.0),
+       (0.21481878265999022, 0.4517997331693586, 0.8658694426555174)]
 pl.show()
 # pl.camera_position  # return camera position when plot is closed

@@ -53,8 +53,11 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **rect_columns_gebco.py**: Visualise GEBCO data set with rectangular columns (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco.png?raw=true "Output from rect_columns_gebco.py")
 
-- **rect_columns_gebco_resolutions.py**: Visualise GEBCO data set with rectangular columns (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed. Different spatial resolutions are visualised.
-![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco_resolutions.png?raw=true "Output from rect_columns_gebco_resolutions.py")
+- **rect_columns_gebco_res_ch.py.py**: Visualise GEBCO data set for Switzerland with rectangular columns (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes are additionally displayed. Different spatial resolutions are visualised.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco_res_ch.png?raw=true "Output from rect_columns_gebco_res_ch.py.py")
+
+- **rect_columns_gebco_res_eu.py**: Visualise GEBCO data set for Middle/South Europe with rectangular columns (-> terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Different spatial resolutions are visualised.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco_res_eu.png?raw=true "Output from rect_columns_gebco_res_eu.py")
 
 - **rect_columns_cosmo_vertical_grid.py**: Visualise COSMO topography for a subregion of the Alps with rectangular columns. Vertical height-based hybrid (Gal-Chen) coordinates are additionally represented.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_cosmo_vertical_grid.png?raw=true "Output from rect_columns_cosmo_vertical_grid.py")

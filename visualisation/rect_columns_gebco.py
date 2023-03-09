@@ -206,8 +206,6 @@ depth_limit *= terrain_exag_fac
 elevation_pad_0 = np.pad(elevation, [(1, 1), (1, 1)], mode="constant",
                          constant_values=np.minimum(0.0, elevation.min()))
 elevation_pad_0 = elevation_pad_0.clip(min=0.0)
-# visualised elevation -> clip values below sea level to 0.0 m
-# (-> 'cell_data', which is used for colouring, uses unmodified 'elevation')
 
 # Compute vertices for grid cell columns
 vertices = terrain3d.rect_columns.get_vertices(x_ver, y_ver, elevation_pad_0)
@@ -217,6 +215,7 @@ vertices_rshp = vertices.reshape((y_ver.size * x_ver.size * 4), 3)
 # Compute quads for grid cell columns
 quads, cell_data, column_index \
     = terrain3d.rect_columns.get_quads(elevation, elevation_pad_0, shp_ver)
+# -> 'cell_data', which is used for coloring, uses un-clipped elevation
 
 # Compute vertices/quads for frame (optional)
 if frame == "monochrome":
@@ -245,7 +244,8 @@ cell_data_sel = cell_data[~mask_1d]
 cell_types = np.empty(quads_sel.shape[0], dtype=np.uint8)
 cell_types[:] = vtk.VTK_QUAD
 grid = pv.UnstructuredGrid(quads_sel.ravel(), cell_types, vertices_rshp)
-grid.cell_data["Surface elevation [m]"] = cell_data_sel
+grid.cell_data["Surface elevation [m]"] = (cell_data_sel / terrain_exag_fac)
+# -> save real (un-scaled) elevation in 'cell_data'
 
 # Lake columns
 quads_sel = quads[mask_1d, :]
@@ -265,7 +265,7 @@ if frame in ("monochrome", "ocean"):
 # -----------------------------------------------------------------------------
 
 # Colormap
-cmap = terrain3d.auxiliary.terrain_colormap(elevation)
+cmap = terrain3d.auxiliary.terrain_colormap((cell_data_sel / terrain_exag_fac))
 
 # Plot
 pl = pv.Plotter()

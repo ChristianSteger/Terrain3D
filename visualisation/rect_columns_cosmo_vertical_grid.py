@@ -56,13 +56,12 @@ ds.close()
 terrain_exag_fac = 8.0  # terrain exaggeration factor [-]
 sel_thin = (slice(7, 17), slice(3, 17), [5, 15, 30, 45, 60])
 sel_thick = (slice(7, 17), slice(3, 17), [15, 60])
-# selection of grid that is plotted with thin/thick lines (y, x, z)
 
 # -----------------------------------------------------------------------------
 # Prepare data
 # -----------------------------------------------------------------------------
 
-# # Test plot
+# # Plot elevation of select domain
 # plt.figure()
 # plt.pcolormesh(rlon, rlat, hsurf)
 # plt.colorbar()
@@ -79,8 +78,6 @@ elevation = hsurf * terrain_exag_fac
 elevation_pad_0 = np.pad(elevation, [(1, 1), (1, 1)], mode="constant",
                          constant_values=np.minimum(0.0, elevation.min()))
 elevation_pad_0 = elevation_pad_0.clip(min=0.0)
-# visualised elevation -> clip values below sea level to 0.0 m
-# (-> 'cell_data', which is used for colouring, uses unmodified 'elevation')
 
 # Compute vertices for grid cell columns
 vertices = terrain3d.rect_columns.get_vertices(x_ver, y_ver, elevation_pad_0)
@@ -90,6 +87,7 @@ vertices_rshp = vertices.reshape((y_ver.size * x_ver.size * 4), 3)
 # Compute quads for grid cell columns
 quads, cell_data, column_index \
     = terrain3d.rect_columns.get_quads(elevation, elevation_pad_0, shp_ver)
+# -> 'cell_data', which is used for coloring, uses un-clipped elevation
 
 # Mask lake/ocean grid cells (-> represent as blue area)
 mask_water = (fr_land < 0.5)
@@ -105,7 +103,8 @@ cell_data_sel = cell_data[~mask_1d]
 cell_types = np.empty(quads_sel.shape[0], dtype=np.uint8)
 cell_types[:] = vtk.VTK_QUAD
 grid = pv.UnstructuredGrid(quads_sel.ravel(), cell_types, vertices_rshp)
-grid.cell_data["Surface elevation [m]"] = cell_data_sel
+grid.cell_data["Surface elevation [m]"] = (cell_data_sel / terrain_exag_fac)
+# -> save real (un-scaled) elevation in 'cell_data'
 
 # Lake/ocean columns
 quads_sel = quads[mask_1d, :]
@@ -149,11 +148,14 @@ for i in sel_thick[2]:
 # -----------------------------------------------------------------------------
 
 # Colormap
-cmap = terrain3d.auxiliary.terrain_colormap(elevation)
+cmap = terrain3d.auxiliary.truncate_colormap(cm.bukavu, (0.5, 1.0))
+cmap = terrain3d.auxiliary.discretise_colormap(cmap, num_cols=16)
+clim = (0.0, 4000.0)
 
 # Plot
 pl = pv.Plotter()
-pl.add_mesh(grid, cmap=cmap, show_edges=False, show_scalar_bar=False)
+pl.add_mesh(grid, cmap=cmap, clim=clim, show_edges=False,
+            show_scalar_bar=False)
 if np.any(mask_water):
     pl.add_mesh(grid_water, color=cm.bukavu(0.3), show_edges=False)
 pl.add_mesh(wire_ent, show_edges=True, style="wireframe", line_width=5.0,
