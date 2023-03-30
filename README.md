@@ -1,6 +1,10 @@
 # Terrain3D
 Three-dimensional visualisation of terrain data from digital elevation models (DEMs) or climate model topography with [PyVista](https://docs.pyvista.org). A set of Python example scripts illustrates how this data can be plotted for various domains and with auxiliary information.
 
+When you use Terrain3D, please cite:
+
+[![DOI](https://zenodo.org/badge/599311358.svg)](https://zenodo.org/badge/latestdoi/599311358)
+
 # Package dependencies
 
 The following Python packages are required to run Terrain3D: NumPy, SciPy, Xarray, Numba, Shapely, descartes, Fiona, Rasterio, tqdm, requests, PyVista, Matplotlib, pyproj, cmcrameri, netCDF4, cartopy, xESMF, scikit-image and Pillow.
