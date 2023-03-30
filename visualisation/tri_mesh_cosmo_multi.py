@@ -41,9 +41,16 @@ if background_color == "black":
 else:
     txt_color = "black"
 
-# Path for example data
-path_examp = os.path.join(os.path.split(
-    os.path.dirname(terrain3d.__file__))[0], "example_data/")
+# Download example data
+path_examp = terrain3d.auxiliary.get_path_data() + "example_data/"
+if not os.path.exists(path_examp):
+    os.makedirs(path_examp)
+for i in ["hengduan_mountains_4.4km_topo.nc",
+          "hengduan_mountains_4.4km_red_topo.nc",
+          "hengduan_mountains_4.4km_env_topo.nc"]:
+    terrain3d.auxiliary.download_file(
+        "https://github.com/ChristianSteger/Terrain3D/blob/main/example_data/"
+        + i + "?raw=true", path_examp + i)
 
 # Load topographies
 hsurf = {}

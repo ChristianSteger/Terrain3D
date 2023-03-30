@@ -24,9 +24,14 @@ mpl.style.use("classic")
 # Select COSMO resolution and domain
 # -----------------------------------------------------------------------------
 
-# Path for example data
-path_examp = os.path.join(os.path.split(
-    os.path.dirname(terrain3d.__file__))[0], "example_data/")
+# Download example data
+path_examp = terrain3d.auxiliary.get_path_data() + "example_data/"
+if not os.path.exists(path_examp):
+    os.makedirs(path_examp)
+for i in ["greater_alpine_region_2.2km.nc", "europe_12km.nc"]:
+    terrain3d.auxiliary.download_file(
+        "https://github.com/ChristianSteger/Terrain3D/blob/main/example_data/"
+        + i + "?raw=true", path_examp + i)
 
 # # ~2.2 km
 # ds = xr.open_dataset(path_examp + "greater_alpine_region_2.2km.nc")

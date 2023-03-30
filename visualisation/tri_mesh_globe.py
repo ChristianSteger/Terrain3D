@@ -178,6 +178,10 @@ pl.show()
 # Create animation (--> orbiting around globe)
 # -----------------------------------------------------------------------------
 
+# Check if output directory exists
+if not os.path.isdir(path_out):
+    raise ValueError("Output directory does not exist")
+
 # Compute camera orbit
 num_frames = 500  # number of frames (for movie)
 azimuth = np.linspace(0.0, 360.0 - (360 / num_frames), num_frames)
