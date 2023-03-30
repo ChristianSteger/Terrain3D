@@ -1,6 +1,7 @@
 # Description: Visualise GEBCO or MERIT data for subregion in Switzerland with
 #              a triangle mesh. Use a planar map projection and display
-#              'idealised' vertical grid of a GCM/RCM. Optionally display lakes.
+#              'idealised' vertical grid of a GCM/RCM. Optionally display
+#              lakes.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
 # MIT License

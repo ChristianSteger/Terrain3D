@@ -2,8 +2,8 @@
 #              a triangle mesh on a planar map projection. Illustrate the
 #              algorithm to compute terrain horizon (according to HORAYZON;
 #              https://doi.org/10.5194/gmd-15-6817-2022) in an animation.
-#              Combining the invividual images of the animation into a movie
-#              or GIF requires 'FFmpeg' or 'ImageMagick', respecitvely.
+#              Combining the individual images of the animation into a movie
+#              or GIF requires 'FFmpeg' or 'ImageMagick', respectively.
 #
 # Copyright (c) 2023 ETH Zurich, Christian R. Steger
 # MIT License
@@ -29,7 +29,7 @@ mpl.style.use("classic")
 # -----------------------------------------------------------------------------
 
 ter_exa_fac = 1.5  # terrain exaggeration factor [-]
-domain = ( 9.231788 - 0.2, 9.231788 + 0.2,
+domain = (9.231788 - 0.2, 9.231788 + 0.2,
           47.119357 - 0.15, 47.119357 + 0.15)  # Walensee (Switzerland)
 dist_search = 10000.0  # search distance for terrain horizon [m]
 hori_acc = np.deg2rad(1.0)  # accuracy of horizon computation [degree]
@@ -164,6 +164,7 @@ def terrain_horizon(vertices, quad_indices, observer, hori_acc, azim_num,
             step += 1
 
     return data, hori_loc, hori_elev, hori_dist
+
 
 # -----------------------------------------------------------------------------
 # Prepare data
@@ -306,7 +307,7 @@ for i in list(data.keys()):
 # Merge (and crop) images
 images = sorted(glob.glob(path_out + "fig_???.png"))
 images_inset = sorted(glob.glob(path_out + "inset_images/fig_???.png"))
-if (len(images) != len(images_inset) != len(data)):
+if len(images) != len(images_inset) != len(data):
     raise ValueError("Images incomplete")
 os.mkdir(path_out + "merged/")
 box = (200, 600, 3000, 2500)  # (left, upper, right, lower)
