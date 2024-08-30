@@ -54,6 +54,9 @@ A number of examples scripts are provided in the folder *visualisation*:
 - **tri_mesh_cosmo_multi.py**: Visualise COSMO topography for the Hengduan Mountains (Southeastern Tibetan Plateau) with a triangle mesh. Plot three different topographies (present-day, reduced and envelope).
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Tri_mesh_cosmo_multi.png?raw=true "Output from tri_mesh_cosmo_multi.py")
 
+- **tri_mesh_aster_icon_radar.py**: Visualise raw ASTER 30 m DEM and ICON 1km topography with radar location.
+![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Tri_mesh_aster_icon_radar.png?raw=true "Output from rect_columns_cosmo_vertical_grid.py")
+
 - **rect_columns_gebco.py**: Visualise GEBCO data set with rectangular columns (&rarr; terrain representation in climate models). The elevation of grid cells, which are below sea level and are land according to the GSHHG data base, are set to 0.0 m. Lakes can optionally be displayed.
 ![Alt text](https://github.com/ChristianSteger/Media/blob/master/Terrain3D/Rect_columns_gebco.png?raw=true "Output from rect_columns_gebco.py")
 
@@ -78,6 +81,7 @@ And the following auxiliary data is applied:
 - [GSHHG](https://www.soest.hawaii.edu/pwessel/gshhg/)
 - [Natural Earth - Glaciated Areas](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-glaciated-areas/)
 - [Natural Earth - Antarctic Ice Shelves](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-antarctic-ice-shelves/)
+- [swissTLMRegio - Swiss lake outlines](https://www.swisstopo.admin.ch/de/landschaftsmodell-swisstlmregio)
 
 # Support and collaboration
 

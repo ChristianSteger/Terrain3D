@@ -1,5 +1,5 @@
-# Description: Raw ASTER 30 m resolution DEM vs. ICON 1km resolution 
-#              topography with radar location
+# Description: Visualise raw ASTER 30 m DEM and ICON 1km topography with
+#              radar location.
 #
 # Copyright (c) 2024 MeteoSwiss, Christian R. Steger
 
@@ -15,8 +15,9 @@ import matplotlib as mpl
 import terrain3d
 import xarray as xr
 from cmcrameri import cm
+from skimage.measure import label
 
-mpl.style.use("classic")
+mpl.style.use("classic") # type: ignore
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -25,13 +26,13 @@ mpl.style.use("classic")
 # Miscellaneous
 ter_exa_fac = 2.0  # terrain exaggeration factor [-]
 show_lakes = True  # represent lakes as blue areas
-# path_examp = "/home/stc/Desktop/data/"
-# path_examp = "/Users/csteger/Dropbox/MeteoSwiss/Terrain3D/"
+lake_elev_equal = True  # equalise elevation of lakes
 path_examp = terrain3d.auxiliary.get_path_data() + "example_data/"
 
 # Radar location (longitude, latitude, altitude) [deg, deg, m asl]
 radar_loc = (8.833217, 46.040791, 1626)  # Monte Lema
 # radar_loc = (7.486552, 46.370646, 2937)  # Pointe de la Plaine Morte
+# -> important note: example data does not cover below stations!
 # radar_loc = (8.512000, 47.284333, 938)  # Albis
 # radar_loc = (6.099415, 46.425113, 1682)  # La Dole
 # radar_loc = (9.794458, 46.834974, 2850)  # Weissfluhgipfel
@@ -65,9 +66,10 @@ if not os.path.exists(path_examp):
 for i in ["ASTER_orig_T031.nc",
           "icon_grid_0001_R19B08_mch_DOM01.nc",
           "lfff00000000c.nc"]:
-    terrain3d.auxiliary.download_file(
-        "https://github.com/ChristianSteger/Example_data/blob/main/Terrain3D/"
-        + i + "?raw=true", path_examp + i)
+    if not os.path.isfile(path_examp + i):
+        terrain3d.auxiliary.download_file(
+            "https://github.com/ChristianSteger/Example_data/blob/main/"
+            + "Terrain3D/" + i + "?raw=true", path_examp + i)
 
 # -----------------------------------------------------------------------------
 # Prepare DEM data (ASTER)
@@ -82,13 +84,6 @@ lat_ver = ds["lat"].values[::-1]
 elevation_ver = np.flipud(ds["Z"].values)
 ds.close()
 crs_dem = CRS.from_string("EPSG:4326")
-# -------------------
-# ds = xr.open_dataset(path_data + "ASTER_orig_T031.nc")
-# ds_sel = ds.sel(lon=slice(7.0, 9.25), lat=slice(46.75, 45.5))
-# comp = dict(zlib=True, complevel=1)
-# encoding = {var: comp for var in ds_sel.data_vars}
-# ds_sel.to_netcdf(path_data + "var_sel/ASTER_orig_T031.nc", encoding=encoding)
-# -------------------
 
 # Compute binary lake mask (optional)
 if show_lakes:
@@ -96,11 +91,6 @@ if show_lakes:
     lat_quad = lat_ver[:-1] + np.diff(lat_ver) / 2.0
     mask_lake = terrain3d.outlines.binary_mask(
         "swiss_lakes", lon_quad, lat_quad, crs_dem, sub_sample_num=5)
-
-# plt.figure()
-# plt.pcolormesh(lon_ver, lat_ver, mask_lake, shading="auto")
-# plt.colorbar()
-# plt.show()
 
 # Transform geographic coordinates to orthographic projection
 crs_wgs84 = CRS.from_string("EPSG:4326")
@@ -131,6 +121,21 @@ vertices = np.hstack((x.ravel()[:, np.newaxis],
 quad_indices = quad_indices.reshape(num_quad_y * num_quad_x, 5)
 if quad_indices.max() >= vertices.shape[0]:
     raise ValueError("Index out of bounds!")
+
+# Adjust elevation of lake quads to same elevation (optional)
+if lake_elev_equal:
+    lake_labels, nums = label(mask_lake.astype(int), background=0,
+                            return_num=True, connectivity=2) # type: ignore
+    for i in range(1, nums + 1):
+        ind_cell = np.where(lake_labels.ravel() == i)[0]
+        count = np.zeros(vertices.shape[0], dtype=np.int32)
+        for i in ind_cell:
+            ind_vertex = quad_indices[i, 1:]
+            count[ind_vertex] += 1
+        mask_bound = (count > 0) & (count < 4)
+        elev_bound_mean = vertices[mask_bound, 2].mean()
+        mask_all = (count > 0)
+        vertices[mask_all, 2] = elev_bound_mean
 
 # Create mesh
 if not show_lakes:
@@ -166,23 +171,10 @@ vlat = np.rad2deg(ds["vlat"].values)
 vertex_of_cell = ds["vertex_of_cell"].values - 1
 cells_of_vertex = ds["cells_of_vertex"].values - 1
 ds.close()
-# -------------------
-# ds_sel = ds[["clon", "clat", "vlon", "vlat", "vertex_of_cell", "cells_of_vertex"]]
-# comp = dict(zlib=True, complevel=1)
-# encoding = {var: comp for var in ds_sel.data_vars}
-# ds_sel.to_netcdf(path_data + "var_sel/icon_grid_0001_R19B08_mch_DOM01.nc", encoding=encoding)
-# -------------------
-
 ds = xr.open_dataset(path_examp + "lfff00000000c.nc")
 hsurf = ds["HSURF"].values
 mask_water = (ds["soiltyp"].values == 9)
 ds.close()
-# -------------------
-# ds_sel = ds[["HSURF", "soiltyp"]].drop_vars(["clon", "clat"])
-# comp = dict(zlib=True, complevel=1)
-# encoding = {var: comp for var in ds_sel.data_vars}
-# ds_sel.to_netcdf(path_data + "var_sel/lfff00000000c.nc", encoding=encoding)
-# -------------------
 
 # Compute elevation at vertices as average of adjacent cells
 hsurf_vertex = np.empty(vlon.size, dtype=np.float64)
@@ -259,7 +251,7 @@ pl.add_mesh(grid_dem, scalars="Surface elevation", show_edges=False, cmap=cmap,
             clim=clim, scalar_bar_args=col_bar_args)
 if show_lakes:
     pl.add_mesh(grid_dem_lake, color=cm.bukavu(0.3), show_edges=False)
-# pl.set_background("black")  # type: ignore
+pl.set_background("black")  # type: ignore
 pl.remove_scalar_bar()  # type: ignore
 pt_obs = pv.Sphere(radius=radar_radius,
                    center=np.array([0.0, 0.0, radar_loc[2] * ter_exa_fac]))
@@ -271,7 +263,7 @@ pl.add_mesh(grid_icon, scalars="Surface elevation", show_edges=True, cmap=cmap,
             clim=clim, scalar_bar_args=col_bar_args)
 if show_lakes:
     pl.add_mesh(grid_icon_lake, color=cm.bukavu(0.3), show_edges=True)
-# pl.set_background("black")  # type: ignore
+pl.set_background("black")  # type: ignore
 pl.remove_scalar_bar()  # type: ignore
 pt_obs = pv.Sphere(radius=radar_radius,
                    center=np.array([0.0, 0.0, radar_loc[2] * ter_exa_fac]))
