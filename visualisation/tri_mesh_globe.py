@@ -23,7 +23,7 @@ import matplotlib as mpl
 import cartopy.crs as ccrs
 import terrain3d
 
-mpl.style.use("classic")
+mpl.style.use("classic") # type: ignore
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -34,7 +34,7 @@ mpl.style.use("classic")
 res_ter = 0.05  # resolution of visualised terrain [degree]
 gebco_agg_num = 12  # aggregation number of input GEBCO data [-]
 ter_exa_fac = 25.0  # terrain exaggeration factor [-]
-path_out = os.getenv("HOME") + "/Desktop/PyVista_globe/"
+path_out = os.getenv("HOME") + "/Desktop/PyVista_globe/" # type: ignore
 # output directory for animation
 
 # -----------------------------------------------------------------------------
@@ -69,11 +69,11 @@ print("GEBCO data interpolated (%.1f" % (time.time() - t_beg) + " s)")
 
 # Set elevation of quad vertices, which are land and below sea level, to 0.0 m
 mask_land = terrain3d.outlines.binary_mask(
-    "shorelines", lon_ver, lat_ver, crs_in, resolution="intermediate", level=1,
-    sub_sample_num=1)
+    "shorelines", lon_ver, lat_ver, crs_in, sub_sample_num=1,
+    resolution="intermediate", level=1)
 mask_lakes = terrain3d.outlines.binary_mask(
-    "shorelines", lon_ver, lat_ver, crs_in, resolution="intermediate", level=2,
-    sub_sample_num=1)
+    "shorelines", lon_ver, lat_ver, crs_in, sub_sample_num=1,
+    resolution="intermediate", level=2)
 mask_land[mask_lakes] = False
 mask_lbsl = (elevation_ver < 0.0) & mask_land  # mask with land below sea level
 elevation_ver[mask_lbsl] = 0.0
@@ -170,8 +170,8 @@ col_bar_args = dict(height=0.25, vertical=True, position_x=0.8, position_y=0.1)
 pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap,
             scalar_bar_args=col_bar_args)
 pl.add_mesh(grid_ice, color="white", show_edges=False)
-pl.set_background("black")
-pl.remove_scalar_bar()
+pl.set_background("black") # type: ignore
+pl.remove_scalar_bar() # type: ignore
 pl.show()
 
 # -----------------------------------------------------------------------------
@@ -208,7 +208,7 @@ pl = pv.Plotter(window_size=[1500, 1500], off_screen=True)
 pl.add_mesh(grid, scalars="Surface elevation", show_edges=False, cmap=cmap,
             show_scalar_bar=False)
 pl.add_mesh(grid_ice, color="white", show_edges=False)
-pl.set_background("black")
+pl.set_background("black") # type: ignore
 pl.camera_position = "yz"
 pl.camera.zoom(1.5)
 for i in range(num_frames):

@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import terrain3d
 
-mpl.style.use("classic")
+mpl.style.use("classic") # type: ignore
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -57,8 +57,7 @@ if show_lakes:
     lon_quad = lon_ver[:-1] + np.diff(lon_ver) / 2.0
     lat_quad = lat_ver[:-1] + np.diff(lat_ver) / 2.0
     mask_lake = terrain3d.outlines.binary_mask(
-        "shorelines", lon_quad, lat_quad, crs_dem, resolution="full", level=2,
-        sub_sample_num=5)
+        "swiss_lakes", lon_quad, lat_quad, crs_dem, sub_sample_num=5)
 
     # # Test plot
     # plt.figure()
@@ -143,8 +142,8 @@ pl.add_mesh(wire_low, show_edges=True, style="wireframe", line_width=5.0,
             color="grey", edge_color="white", opacity=0.8)
 pl.add_mesh(wire_ur, show_edges=True, style="wireframe", line_width=5.0,
             color="grey", edge_color="white", opacity=0.8)
-pl.set_background("black")
-pl.remove_scalar_bar()
+pl.set_background("black") # type: ignore
+pl.remove_scalar_bar() # type: ignore
 pl.camera_position = \
     [(-62054.57748529176, -155350.56959819535, 233420.00951741208),
      (1.3096723705530167e-10, 266.91871005502617, 24000.0),

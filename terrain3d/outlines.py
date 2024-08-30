@@ -82,7 +82,6 @@ def _download(path_data_root, product):
             with zipfile.ZipFile(file_zipped, "r") as zip_ref:
                 for file_name in zip_ref.namelist():
                     file_name_cor = file_name.replace("\\", "/")
-                    print(file_name_cor)
                     zip_ref.getinfo(file_name).filename = file_name_cor
                     zip_ref.extract(file_name, path_data)
         os.remove(file_zipped)

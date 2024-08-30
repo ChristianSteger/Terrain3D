@@ -22,7 +22,7 @@ import matplotlib as mpl
 import time
 import terrain3d
 
-mpl.style.use("classic")
+mpl.style.use("classic") # type: ignore
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -126,12 +126,9 @@ for i in list(rot_coords.keys()):
     print("Elapsed time: %.1f" % (time.time() - t_beg) + " s")
 
     # Compute land-sea mask
-    mask_land = terrain3d.outlines.binary_mask("shorelines", rlon, rlat,
-                                               crs_rot,
-                                               resolution="intermediate",
-                                               level=1,
-                                               sub_sample_num=10,
-                                               filter_polygons=True)
+    mask_land = terrain3d.outlines.binary_mask(
+        "shorelines", rlon, rlat, crs_rot, sub_sample_num=10,
+        filter_polygons=True, resolution="intermediate", level=1)
     mask = mask_land & (elevation_in < 0.0)
     print("Ocean-land-inconsistency: increase elevation of "
           + str(mask.sum()) + " grid cells to 0.0 m")
@@ -204,7 +201,7 @@ cell_data_max = np.array([data[i]["cell_data_range"][1]
                           for i in rot_coords.keys()]).max()
 clim = (cell_data_min / terrain_exag_fac, cell_data_max / terrain_exag_fac)
 cmap = terrain3d.auxiliary.terrain_colormap(np.array(clim))
-color_lake = cm.bukavu(0.3)
+color_lake = cm.bukavu(0.3) # type: ignore
 
 # Plot
 pos = ((0, 1), (1, 1), (1, 3))
@@ -219,7 +216,7 @@ for ind, i in enumerate(list(rot_coords.keys())):
         pl.add_mesh(data[i]["grid_low"], color="lightgrey", show_edges=False)
     txt = "~" + i[:-2] + " " + i[-2:]
     pl.add_text(txt, font_size=25, color="white", position=(150.0, 680.0))
-    pl.set_background("black")
+    pl.set_background("black") # type: ignore
 pl.link_views()
 pl.camera_position \
     = [(-3282418.0538254846, -4079279.745528131, 2942871.552600236),

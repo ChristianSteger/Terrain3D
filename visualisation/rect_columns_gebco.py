@@ -22,7 +22,7 @@ import time
 from skimage.measure import label
 import terrain3d
 
-mpl.style.use("classic")
+mpl.style.use("classic") # type: ignore
 
 # -----------------------------------------------------------------------------
 # Settings
@@ -130,8 +130,8 @@ rlon_edge, rlat_edge = terrain3d.auxiliary.gridcoord(rlon, rlat)
 if plot_sel_dom:
     plt.figure()
     ax = plt.axes(projection=crs_rot)
-    ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.BORDERS)
+    ax.add_feature(cfeature.COASTLINE) # type: ignore
+    ax.add_feature(cfeature.BORDERS) # type: ignore
     rlon_co = np.array([rlon[0] - d_rlon / 2.0, rlon[-1] + d_rlon / 2.0,
                         rlon[-1] + d_rlon / 2.0, rlon[0] - d_rlon / 2.0])
     rlat_co = np.array([rlat[0] - d_rlat / 2.0, rlat[0] - d_rlat / 2.0,
@@ -172,10 +172,9 @@ elevation_in = regridder(elevation_in.astype(np.float32))
 print("Elapsed time: %.1f" % (time.time() - t_beg) + " s")
 
 # Compute land-sea mask
-mask_land = terrain3d.outlines.binary_mask("shorelines", rlon, rlat, crs_rot,
-                                           resolution="intermediate", level=1,
-                                           sub_sample_num=10,
-                                           filter_polygons=True)
+mask_land = terrain3d.outlines.binary_mask(
+    "shorelines", rlon, rlat, crs_rot, sub_sample_num=10,
+    filter_polygons=True, resolution="intermediate", level=1)
 mask = mask_land & (elevation_in < 0.0)
 print("Ocean-land-inconsistency: increase elevation of " + str(mask.sum())
       + " grid cells to 0.0 m")
@@ -187,8 +186,8 @@ if not show_lakes:
     mask_lake = np.zeros(elevation_in.shape, dtype=bool)
 else:
     mask_lake = terrain3d.outlines.binary_mask(
-        "shorelines", rlon, rlat, crs_rot, resolution="full", level=2,
-        sub_sample_num=10)
+        "shorelines", rlon, rlat, crs_rot, sub_sample_num=10,
+        resolution="full", level=2)
     if lake_elev_equal:
         lakes_con, num_labels = label(mask_lake.astype(int), background=0,
                                       connectivity=2, return_num=True)
@@ -274,7 +273,7 @@ if np.any(mask_lake):
     pl.add_mesh(grid_lake, color=cm.bukavu(0.3), show_edges=False)
 if frame in ("monochrome", "ocean"):
     pl.add_mesh(grid_low, color="lightgrey", show_edges=False)
-pl.set_background("black")
+pl.set_background("black") # type: ignore
 # pl.camera_position = \
 #     [(-282445.58202424366, -540119.7098944773, 637043.5660801955),
 #      (-136769.69537015786, -20571.05174266603, 7556.56201171875),

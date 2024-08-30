@@ -146,12 +146,9 @@ for i in list(rot_coords.keys()):
     print("Elapsed time: %.1f" % (time.time() - t_beg) + " s")
 
     # Compute land-sea mask
-    mask_land = terrain3d.outlines.binary_mask("shorelines", rlon, rlat,
-                                               crs_rot,
-                                               resolution="intermediate",
-                                               level=1,
-                                               sub_sample_num=10,
-                                               filter_polygons=True)
+    mask_land = terrain3d.outlines.binary_mask(
+        "shorelines", rlon, rlat, crs_rot, sub_sample_num=10,
+        filter_polygons=True, resolution="intermediate", level=1)
     mask = mask_land & (elevation_in < 0.0)
     print("Ocean-land-inconsistency: increase elevation of "
           + str(mask.sum()) + " grid cells to 0.0 m")
@@ -160,8 +157,8 @@ for i in list(rot_coords.keys()):
 
     # Display lakes (-> as blue areas in visualisation)
     mask_lake = terrain3d.outlines.binary_mask(
-        "shorelines", rlon, rlat, crs_rot, resolution="full", level=2,
-        sub_sample_num=10)
+        "shorelines", rlon, rlat, crs_rot, sub_sample_num=10,
+        resolution="full", level=2)
     if lake_elev_equal:
         lakes_con, num_labels = label(mask_lake.astype(int), background=0,
                                       connectivity=2, return_num=True)
@@ -277,8 +274,8 @@ for ind, i in enumerate(list(rot_coords.keys())):
         pl.add_mesh(data[i]["grid_low"], color="lightgrey", show_edges=False)
     txt = "~" + i[:-2] + " " + i[-2:]
     pl.add_text(txt, font_size=25, color=color_inverse,
-                position=(260.0, 1020.0))
-    pl.set_background(color_background)
+                position=(260.0, 1020.0)) # type: ignore
+    pl.set_background(color_background) # type: ignore
 pl.link_views()
 pl.camera_position \
     = [(-149896.08171727188, -339872.08789620723, 490354.83265173994),
@@ -308,8 +305,8 @@ gl.right_labels = False
 gl.top_labels = False
 gl.xlines = False
 gl.ylines = False
-gl.ylocator = mticker.FixedLocator(xticks)
-gl.xlocator = mticker.FixedLocator(yticks)
+gl.ylocator = mticker.FixedLocator(xticks) # type: ignore
+gl.xlocator = mticker.FixedLocator(yticks) # type: ignore
 gl.xlabel_style = {"size": labels_size, "color": color_inverse,
                    "weight": labels_weight}
 gl.ylabel_style = {"size": labels_size, "color": color_inverse,
