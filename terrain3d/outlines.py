@@ -20,23 +20,24 @@ import terrain3d
 
 def _download(path_data_root, product):
     """Download different shapefiles with outlines (shorelines, glaciated land
-    area or Antarctic ice shelves)
+    area, Antarctic ice shelves or Swiss lakes)
 
     Parameters
     ----------
     path_data_root : str
         Local root path for downloaded data
     product : str
-        Product to download ('shorelines', 'glacier_land' or
-        'antarctic_ice_shelves')"""
+        Product to download ('shorelines', 'glacier_land',
+        'antarctic_ice_shelves' or 'swiss_lakes')"""
 
     # Check arguments
     if not os.path.isdir(path_data_root):
         raise ValueError("Local root path does not exist")
     if product not in ("shorelines", "glacier_land",
-                       "antarctic_ice_shelves"):
+                       "antarctic_ice_shelves", "swiss_lakes"):
         raise ValueError("Unknown product. Known products are 'shorelines',"
-                         + " 'glacier_land' or 'antarctic_ice_shelves'")
+                         + " 'glacier_land', 'antarctic_ice_shelves'"
+                         + " or 'swiss_lakes'")
 
     # Product information
     product_info = \
@@ -56,7 +57,14 @@ def _download(path_data_root, product):
                      + "www.naturalearthdata.com/download/10m/"
                      + "physical/ne_10m_antarctic_ice_shelves_polys.zip",
               "folder": "ne_10m_antarctic_ice_shelves",
-              "print": "antarctic ice shelf outlines from Natural Earth"}}
+              "print": "antarctic ice shelf outlines from Natural Earth"},
+
+         "swiss_lakes":
+             {"url": "https://data.geo.admin.ch/ch.swisstopo.swisstlmregio/" 
+                    + "swisstlmregio_2023/swisstlmregio_2023_2056.shp.zip",
+              "folder": "swiss_lake_outlines",
+              "print": "swiss lake outlines from swissTLMRegio (swisstopo)"}
+        }
 
     # Download data
     path_data = path_data_root + product_info[product]["folder"]
@@ -66,45 +74,55 @@ def _download(path_data_root, product):
         file_zipped = path_data + ".zip"
         terrain3d.auxiliary.download_file(product_info[product]["url"],
                                           file_zipped)
-        with zipfile.ZipFile(file_zipped, "r") as zip_ref:
-            zip_ref.extractall(path_data)
+        if product != "swiss_lakes":
+            with zipfile.ZipFile(file_zipped, "r") as zip_ref:
+                zip_ref.extractall(path_data)
+        else:
+            # Files in swissTLMRegio data have invalid folder separator (\\)
+            with zipfile.ZipFile(file_zipped, "r") as zip_ref:
+                for file_name in zip_ref.namelist():
+                    file_name_cor = file_name.replace("\\", "/")
+                    print(file_name_cor)
+                    zip_ref.getinfo(file_name).filename = file_name_cor
+                    zip_ref.extract(file_name, path_data)
         os.remove(file_zipped)
 
 
 # -----------------------------------------------------------------------------
 
-def binary_mask(product, x, y, crs_grid, resolution="intermediate",
-                level=1, sub_sample_num=1, filter_polygons=False):
+def binary_mask(product, x, y, crs_grid, sub_sample_num=1,
+                filter_polygons=False, **kwargs):
     """Compute binary mask from outlines.
 
     Parameters
     ----------
     product : str
-        Outline product ('shorelines', 'glacier_land' or
-        'antarctic_ice_shelves')
+        Outline product ('shorelines', 'glacier_land', 'antarctic_ice_shelves'
+        or 'swiss_lakes')
     x : ndarray of double
         Array (1-dimensional) with x-coordinates [arbitrary]
     y : ndarray of double
         Array (1-dimensional) with y-coordinates [arbitrary]
     crs_grid : pyproj.crs.crs.CRS
         Geospatial reference system of gridded input data
-    resolution : str
-        Resolution of shoreline outlines (either 'crude', 'low',
-        'intermediate', 'high' or 'full')
-    level : int
-        Level of shoreline data ('1' to '6'). Available levels are:
-        1: Continental land masses and ocean islands, except Antarctica
-        2: Lakes
-        3: Islands in lakes
-        4: Ponds in islands within lakes
-        5: Antarctica based on ice front boundary
-        6: Antarctica based on grounding line boundary
     sub_sample_num : int
         Number of sub-samples that are performed within a grid cell in
         one direction. Sampling is conducted evenly-spaced. Example: with the
         setting 'sub_sample_num = 3', 3 x 3 = 9 samples are performed.
     filter_polygons : bool
         Only consider polygons that intersect with relevant domain.
+    **kwargs : shoreline properties, optional
+        resolution : str
+            Resolution of shoreline outlines (either 'crude', 'low',
+            'intermediate', 'high' or 'full')
+        level : int
+            Level of shoreline data ('1' to '6'). Available levels are:
+            1: Continental land masses and ocean islands, except Antarctica
+            2: Lakes
+            3: Islands in lakes
+            4: Ponds in islands within lakes
+            5: Antarctica based on ice front boundary
+            6: Antarctica based on grounding line boundary
 
     Returns
     -------
@@ -113,20 +131,27 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
 
     # Check arguments
     if product not in ("shorelines", "glacier_land",
-                       "antarctic_ice_shelves"):
+                       "antarctic_ice_shelves", "swiss_lakes"):
         raise ValueError("Unknown product. Known products are 'shorelines',"
-                         + " 'glacier_land' or 'antarctic_ice_shelves'")
+                         + " 'glacier_land', 'antarctic_ice_shelves' or "
+                         + "'swiss_lakes'")
     if not np.all(np.diff(x) > 0):
         raise ValueError("x-coordinates are not strictly increasing")
     if not np.all(np.diff(y) > 0):
         raise ValueError("y-coordinates values not strictly increasing")
-    if resolution not in ("crude", "low", "intermediate", "high", "full"):
-        raise ValueError("Invalid value for 'resolution'. Valid values are "
-                         + "'crude', 'low', 'intermediate', 'high' or 'full'")
-    if (level < 1) or (level > 6):
-        raise ValueError("Value for 'level' out of range [1 - 6]")
     if (sub_sample_num < 1) or (sub_sample_num > 50):
         raise ValueError("Value for 'sub_sample_num' out of range [1 - 50]")
+    if product == "shorelines":
+        if ("resolution" not in kwargs) or ("level" not in kwargs):
+            raise ValueError("Missing argument 'resolution' and/or 'level'")
+        resolution = kwargs["resolution"]
+        level = kwargs["level"]
+        if resolution not in ("crude", "low", "intermediate", "high", "full"):
+            raise ValueError("Invalid value for 'resolution'. Valid values "
+                             + "are 'crude', 'low', 'intermediate', 'high' "
+                             + "or 'full'")
+        if (level < 1) or (level > 6):
+            raise ValueError("Value for 'level' out of range [1 - 6]")
 
     # Ensure that required data was downloaded
     path_data_root = terrain3d.auxiliary.get_path_data()
@@ -136,21 +161,23 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
           .center(79, "-"))
 
     # Determine shapefile
-    shp_prod = {
-        "shorelines":
-            path_data_root + "gshhg/GSHHS_shp/" + resolution[0]
-            + "/GSHHS_" + resolution[0] + "_L" + str(level) + ".shp",
-        "glacier_land":
-            path_data_root + "ne_10m_glacier_land/ne_10m_glaciated_areas.shp",
-        "antarctic_ice_shelves":
-            path_data_root + "ne_10m_antarctic_ice_shelves/"
+    if product == "shorelines":
+        file_shp = path_data_root + "gshhg/GSHHS_shp/" + resolution[0] \
+        + "/GSHHS_" + resolution[0] + "_L" + str(level) + ".shp"
+    elif product == "glacier_land":
+        file_shp = path_data_root \
+            + "ne_10m_glacier_land/ne_10m_glaciated_areas.shp"
+    elif product == "antarctic_ice_shelves":
+        file_shp = path_data_root + "ne_10m_antarctic_ice_shelves/" \
             + "ne_10m_antarctic_ice_shelves_polys.shp"
-    }
+    else:
+        file_shp = path_data_root + "swiss_lake_outlines/" \
+            + "swisstlmregio_product_lv95/Hydrography/swissTLMRegio_Lake.shp"
 
     # Load polygons
     if not filter_polygons:
-        ds = fiona.open(shp_prod[product])
-        crs_outlines = CRS.from_string(ds.crs["init"])
+        ds = fiona.open(file_shp)
+        crs_outlines = CRS.from_string(ds.crs["init"]) # type: ignore
         polygons = [shape(i["geometry"]) for i in ds]
         ds.close()
     else:
@@ -161,8 +188,8 @@ def binary_mask(product, x, y, crs_grid, resolution="intermediate",
         print("Only consider polygons in the domain: ("
               + ", ".join(["%.3f" % i for i in domain]) + ")")
         polygons = []
-        ds = fiona.open(shp_prod[product])
-        crs_outlines = CRS.from_string(ds.crs["init"])
+        ds = fiona.open(file_shp)
+        crs_outlines = CRS.from_string(ds.crs["init"]) # type: ignore
         for i in ds:
             polygon_shp = shape(i["geometry"])
             if domain_shp.intersects(polygon_shp):
