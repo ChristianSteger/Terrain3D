@@ -18,7 +18,7 @@ import matplotlib as mpl
 from scipy import interpolate
 import terrain3d
 
-mpl.style.use("classic")
+mpl.style.use("classic") # type: ignore
 
 # -----------------------------------------------------------------------------
 # Select COSMO resolution and domain
@@ -30,7 +30,7 @@ if not os.path.exists(path_examp):
     os.makedirs(path_examp)
 for i in ["greater_alpine_region_2.2km.nc", "europe_12km.nc"]:
     terrain3d.auxiliary.download_file(
-        "https://github.com/ChristianSteger/Terrain3D/blob/main/example_data/"
+        "https://github.com/ChristianSteger/Example_data/blob/main/Terrain3D/"
         + i + "?raw=true", path_examp + i)
 
 # # ~2.2 km
@@ -168,5 +168,5 @@ pl.add_mesh(wire_ent, show_edges=True, style="wireframe", line_width=5.0,
 for i in wire_thick:
     pl.add_mesh(i, show_edges=True, style="wireframe", line_width=5.0,
                 color="grey", edge_color="white", opacity=0.8)
-pl.set_background("black")
+pl.set_background("black") # type: ignore
 pl.show()

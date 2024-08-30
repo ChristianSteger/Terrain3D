@@ -4,6 +4,7 @@
 # Copyright (c) 2024 MeteoSwiss, Christian R. Steger
 
 # Load modules
+import os
 import numpy as np
 import vtk
 import pyvista as pv
@@ -45,9 +46,10 @@ radar_radius = 200
 radar_colour = "black"
 
 # -----------------------------------------------------------------------------
-# Domain extent
+# Preparation
 # -----------------------------------------------------------------------------
 
+# Domain extent
 domain_width_lat = ((domain_width * 1000.0) / terrain3d.constants.deg2m)
 domain_width_lon = domain_width_lat * (1.0 / np.cos(np.deg2rad(radar_loc[1])))
 fac_lat = 1.0 / np.cos(np.deg2rad(radar_loc[1]))
@@ -56,11 +58,16 @@ domain = (radar_loc[0] - domain_width_lon / 2.0,
           radar_loc[1] - domain_width_lat / 2.0,
           radar_loc[1] + domain_width_lat / 2.0)
 
-# -----------------------------------------------------------------------------
-# Download the example data
-# -----------------------------------------------------------------------------
-
- # ..........
+# Download example data
+path_examp = terrain3d.auxiliary.get_path_data() + "example_data/"
+if not os.path.exists(path_examp):
+    os.makedirs(path_examp)
+for i in ["ASTER_orig_T031.nc",
+          "icon_grid_0001_R19B08_mch_DOM01.nc",
+          "lfff00000000c.nc"]:
+    terrain3d.auxiliary.download_file(
+        "https://github.com/ChristianSteger/Example_data/blob/main/Terrain3D/"
+        + i + "?raw=true", path_examp + i)
 
 # -----------------------------------------------------------------------------
 # Prepare DEM data (ASTER)

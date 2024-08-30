@@ -49,7 +49,7 @@ for i in ["hengduan_mountains_4.4km_topo.nc",
           "hengduan_mountains_4.4km_red_topo.nc",
           "hengduan_mountains_4.4km_env_topo.nc"]:
     terrain3d.auxiliary.download_file(
-        "https://github.com/ChristianSteger/Terrain3D/blob/main/example_data/"
+        "https://github.com/ChristianSteger/Example_data/blob/main/Terrain3D/"
         + i + "?raw=true", path_examp + i)
 
 # Load topographies
@@ -171,8 +171,8 @@ for ind, i in enumerate(topos):
     pl.add_mesh(data[i]["grid_water"], color=color_water, show_edges=False)
     # pl.remove_scalar_bar()
     pl.add_text(names[i], font_size=22, color=txt_color,
-                position=(150.0, 785.0))
-    pl.set_background(background_color)
+                position=(150.0, 785.0)) # type: ignore
+    pl.set_background(background_color) # type: ignore
 pl.link_views()
 pl.camera_position = \
 [(-1518771.653528124, -2352702.0450042486, 3064710.2674981747),
